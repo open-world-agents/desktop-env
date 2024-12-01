@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "desktop-env"
+version = "0.1.0"
+description = ""
+authors = ["MilkClouds <dellrikee@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+opencv-python-headless = "^4.10.0.84"
+pynput = "^1.7.7"
+tqdm = "^4.67.1"
+loguru = "^0.7.2"
+pygetwindow = "^0.0.9"
+pydantic = "^2.10.1"
+pywin32 = "^308"
+orjson = "^3.10.12"
+pydantic-settings = "^2.6.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
