@@ -1,4 +1,11 @@
 
+# Installation
+```
+conda install -c conda-forge pygobject -y
+conda install -c conda-forge gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly -y
+
+poetry install
+```
 
 # TODOs
 

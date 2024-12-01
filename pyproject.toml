@@ -13,7 +13,6 @@ tqdm = "^4.67.1"
 loguru = "^0.7.2"
 pygetwindow = "^0.0.9"
 pydantic = "^2.10.1"
-pywin32 = "^308"
 orjson = "^3.10.12"
 pydantic-settings = "^2.6.1"
 
