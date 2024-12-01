@@ -16,7 +16,7 @@ def get_window_by_title(window_title_substring: str) -> WindowInfo:
         }
         return WindowInfo(**to_send)
     else:
-        return None
+        raise ValueError(f"No window with title containing '{window_title_substring}' found.")
 
 
 def frame_byte_to_np(frame: bytes, *, width: int = 1920, height: int = 1080):
