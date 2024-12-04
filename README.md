@@ -23,15 +23,7 @@ gst-plugins-base          1.24.6               hb0a98b8_0    conda-forge
 gst-plugins-good          1.24.6               h3b23867_0    conda-forge
 gst-plugins-ugly          1.24.6               ha7af72c_0    conda-forge
 gstreamer                 1.24.6               h5006eae_0    conda-forge
-$ gst-inspect-1.0 d3d11screencapturesrc
-Factory Details:
-  Rank                     none (0)
-  Long-name                Direct3D11 Screen Capture Source
-  Klass                    Source/Video
-  Description              Captures desktop screen
-  Author                   Seungha Yang <seungha@centricular.com>
-  Documentation            https://gstreamer.freedesktop.org/documentation/d3d11/d3d11screencapturesrc.html
-
+$  gst-inspect-1.0.exe d3d11
 Plugin Details:
   Name                     d3d11
   Description              Direct3D11 plugin
@@ -44,6 +36,10 @@ Plugin Details:
   Binary package           GStreamer Bad Plug-ins source release
   Origin URL               Unknown package origin
 
+  d3d11colorconvert: Direct3D11 Colorspace Converter
+  d3d11compositor: Direct3D11 Compositor
+...
+  d3d11screencapturesrc: Direct3D11 Screen Capture Source
 ...
 ```
 
