@@ -19,7 +19,7 @@ def construct_pipeline(
     window_name: Optional[str] = None,
     monitor_idx: Optional[int] = None,
     additional_parameter_for_screencap="",
-    framerate="20/1",
+    framerate="30/1",
     output_format: Literal["raw", "jpeg"] = "raw",
 ) -> str:
     """Construct a GStreamer pipeline for screen capturing.
