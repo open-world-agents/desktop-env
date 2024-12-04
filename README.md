@@ -9,8 +9,20 @@ poetry install
 
 Note: Installing `pygobject` with pip causes `..\meson.build:31:9: ERROR: Dependency 'gobject-introspection-1.0' is required but not found.`
 
-After installation, you may verify with:
+After installation, you may verify installation with following comand.
+- gstreamer version >= 1.24.6
+- Direct3D11 plugin is installed
+
 ```
+$ conda list gst-*
+# packages in environment at C:\Users\...\miniconda3\envs\agent:
+#
+# Name                    Version                   Build  Channel
+gst-plugins-bad           1.24.6               he11079b_0    conda-forge
+gst-plugins-base          1.24.6               hb0a98b8_0    conda-forge
+gst-plugins-good          1.24.6               h3b23867_0    conda-forge
+gst-plugins-ugly          1.24.6               ha7af72c_0    conda-forge
+gstreamer                 1.24.6               h5006eae_0    conda-forge
 $ gst-inspect-1.0 d3d11screencapturesrc
 Factory Details:
   Rank                     none (0)
