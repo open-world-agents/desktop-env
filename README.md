@@ -16,3 +16,4 @@ poetry install
 [] remote desktop control demo that wraps up Desktop and expose network interface through udp/tcp, http/websocket, ...
 [] support various video format besides raw RGBA (jpeg, h264, ...)
 [] multi-os support(Linux & MacOS)
+[] pydantic BaseSettings https://docs.pydantic.dev/latest/concepts/pydantic_settings/
