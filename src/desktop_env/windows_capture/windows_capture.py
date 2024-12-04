@@ -90,15 +90,15 @@ class WindowsCapture(AbstractThread):
         # Get the caps of the sample
         caps: Gst.Caps = sample.get_caps()
         structure: Gst.Structure = caps.get_structure(0)
+        # This width and height may be different with Window's width and height
         width, height, format_ = (
             structure.get_value("width"),
             structure.get_value("height"),
             structure.get_value("format"),
         )
-        # print(f"Received frame: {width}x{height} {format_}")
 
-        current_time = time.time()
         # Calculate time difference
+        current_time = time.time()
         time_diff = current_time - self._last_time
 
         # Update bandwidth every second
