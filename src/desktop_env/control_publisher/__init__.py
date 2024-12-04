@@ -5,6 +5,7 @@ import pynput
 from tqdm import tqdm
 
 from ..threading import AbstractThread
+from .args import ControlPublishArgs
 from .callback_factory import KeyboardListenerFactory, MouseListenerFactory
 
 
@@ -24,6 +25,10 @@ class ControlPublisher(AbstractThread):
         factory = MouseListenerFactory(self.mouse_callback)
         listener = pynput.mouse.Listener(**factory.listeners)
         self._listeners["mouse"] = listener
+
+    @classmethod
+    def from_args(cls, args: ControlPublishArgs):
+        return cls(args.keyboard_callback, args.mouse_callback)
 
     def start(self):
         self.start_free_threaded()

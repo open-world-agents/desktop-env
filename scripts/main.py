@@ -2,6 +2,7 @@ import time
 
 import cv2
 import orjson
+import yaml
 from loguru import logger
 from pydantic import BaseModel
 from tqdm import tqdm
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     args = DesktopArgs(
         windows_capture_args={
             "on_frame_arrived": on_frame_arrived,
-            "pipeline_description": construct_pipeline(monitor_idx=1, window_name="작업 관리자"),
+            "pipeline_description": construct_pipeline(monitor_idx=0, framerate="60/1"),
         },
         window_publisher_args={"callback": write_event_into_jsonl},
         control_publisher_args={
@@ -64,8 +65,12 @@ if __name__ == "__main__":
             "mouse_callback": write_event_into_jsonl,
         },
     )
-    print(args.model_dump_json())
-    desktop = Desktop.from_settings(args)
+    print(args)
+    with open("args.yaml", "w") as f:
+        args_json = args.model_dump_json()
+        args_yaml = yaml.dump(yaml.safe_load(args_json))
+        f.write(args_yaml)
+    desktop = Desktop.from_args(args)
 
     try:
         # Option 1. Start the pipeline in the current thread (blocking)

@@ -9,6 +9,10 @@ class AbstractThread:
     def __init__(self):
         super().__init__()
 
+    @classmethod
+    def from_args(cls, args):
+        raise NotImplementedError
+
     def start(self):
         """Start the task. This function will block the current thread."""
 

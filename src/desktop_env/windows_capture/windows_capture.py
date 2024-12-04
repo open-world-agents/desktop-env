@@ -11,6 +11,7 @@ from gi.repository import GLib, Gst
 from tqdm import tqdm
 
 from ..threading import AbstractThread
+from .args import WindowsCaptureArgs
 from .gst_pipeline import construct_pipeline
 from .msg import FrameStamped
 
@@ -44,6 +45,10 @@ class WindowsCapture(AbstractThread):
         self.appsink.connect("new-sample", self.on_frame_arrived)
 
         self.loop = GLib.MainLoop()
+
+    @classmethod
+    def from_args(cls, args: WindowsCaptureArgs):
+        return cls(args.on_frame_arrived, pipeline_description=args.pipeline_description)
 
     def start(self):
         """Start the pipeline. This function will block the current thread."""
