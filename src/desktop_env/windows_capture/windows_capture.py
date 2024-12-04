@@ -37,7 +37,7 @@ class WindowsCapture(AbstractThread):
 
         # Get the appsink element and set properties
         self.appsink = self.pipeline.get_by_name("appsink")
-        self.appsink.set_property("emit-signals", True)  # This MUST be True
+        self.appsink.set_property("emit-signals", True)  # This MUST be True to capture `new-sample` signal
         self.appsink.set_property("sync", True)  # This should be True, I guess
 
         # Connect to the appsink's new-sample signal
