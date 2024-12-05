@@ -66,15 +66,16 @@ class WindowsCapture(AbstractThread):
         self._loop_thread = threading.Thread(target=start_main_loop, args=(self.loop,))
         self._loop_thread.start()
 
+    # TODO: verify whether stop-join-close lifecycle is correct
     def stop(self):
         self.pipeline.set_state(Gst.State.NULL)
 
-    def join(self):
-        if hasattr(self, "_loop_thread"):
-            self._loop_thread.join()
+    def join(self): ...
 
     def close(self):
         self.loop.quit()
+        if hasattr(self, "_loop_thread"):
+            self._loop_thread.join()
         self.pbar.close()
 
     def __on_new_sample(self, sink, callback: Callable):

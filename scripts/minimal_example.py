@@ -1,18 +1,30 @@
 import time
 
+from loguru import logger
+from tqdm import tqdm
+
 from desktop_env import Desktop, DesktopArgs
 from desktop_env.msg import FrameStamped
 from desktop_env.windows_capture import construct_pipeline
 
+# how to use loguru with tqdm: https://github.com/Delgan/loguru/issues/135
+logger.remove()
+logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
+
 
 def on_frame_arrived(frame: FrameStamped):
     latency = (time.time_ns() - frame.timestamp_ns) / 1e6
-    print(f"Frame arrived at {frame.timestamp_ns}, latency: {latency:.2f} ms")
-    frame_arr = frame.frame_arr  # (W, H, RGBA)
+    logger.debug(
+        f"Frame arrived at {frame.timestamp_ns}, latency: {latency:.2f} ms, frame shape: {frame.frame_arr.shape}"
+    )
+    #  Frame arrived at 1733368006665481600, latency: 0.00 ms, frame shape: (2000, 3000, 4)
 
 
 def on_event(event):
-    print(event)
+    logger.debug(event)
+    # event_type='on_press' event_data=162 event_time=1733368006688750600 device_name='keyboard'
+    # title='windows_capture.py - desktop-env - Visual Studio Code' rect=(527, -1096, 2479, -32) hWnd=1379722
+    # event_type='on_move' event_data=(1323, -154) event_time=1733368048442994300 device_name='mouse'
 
 
 if __name__ == "__main__":
