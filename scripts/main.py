@@ -101,4 +101,5 @@ if __name__ == "__main__":
         pass
     finally:
         desktop.stop()
+        desktop.join()
         desktop.close()
