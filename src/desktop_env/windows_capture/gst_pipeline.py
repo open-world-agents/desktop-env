@@ -51,8 +51,8 @@ def construct_pipeline(
 
     pipeline_description = (
         f"{pipeline_src} {src_parameter} {additional_parameter_for_screencap} do-timestamp=True ! "
-        "videorate drop-only=True ! " + f"video/x-raw,framerate=0/1,max-framerate={framerate} ! "
-        "videoconvert ! " + f"{output_format_to_element(output_format)} ! "
+        "videorate drop-only=True ! " + f"video/x-raw(memory:D3D11Memory),framerate=0/1,max-framerate={framerate} ! "
+        "d3d11download ! " + f"{output_format_to_element(output_format)} ! "
         "appsink name=appsink max-buffers=1 drop=true"
     )
     # max-buffers=1 drop=true: Drop the frame if the buffer is full. it is necessary to prevent memory boom.
