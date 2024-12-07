@@ -1,27 +1,36 @@
-import datetime
-import time
-
 import gi
 
 gi.require_version("Gst", "1.0")
+import datetime
+import time
+
 from gi.repository import GObject, Gst
+from loguru import logger
+from tqdm import tqdm
 
 Gst.init(None)
+pbar = tqdm(unit="frames", dynamic_ncols=True)
 
 
 def on_buffer(pad: Gst.Pad, info: Gst.PadProbeInfo, user_data) -> Gst.PadProbeReturn:
     buffer = info.get_buffer()
     pts = buffer.pts
     if pts != Gst.CLOCK_TIME_NONE:
-        # Get the pipeline's clock
+        # Get the pipeline's clock. Ref: https://gstreamer.freedesktop.org/documentation/gstreamer/gstelement.html?gi-language=python
         pipeline: Gst.Pipeline = user_data["pipeline"]
         clock = pipeline.get_clock()
-        # Get the absolute timestamp of the buffer
-        abs_time = clock.get_time() - pipeline.get_base_time() + pts
-        # Convert nanoseconds to seconds and get UTC time
-        utc_time = datetime.datetime.utcfromtimestamp(abs_time / Gst.SECOND)
+        assert clock.props.clock_type == Gst.ClockType.MONOTONIC
+        elapsed_time_from_playing = clock.get_time() - pipeline.get_base_time()
+        latency = elapsed_time_from_playing - pts
 
-        utc_time = datetime.datetime.utcnow()
+        # Print the latency in milliseconds
+        pbar.set_postfix(latency=f"{latency / Gst.MSECOND:.2f} ms")
+        pbar.update(1)
+
+        frame_time_in_monotonic = pts + pipeline.get_base_time()
+        frame_time_in_utc = frame_time_in_monotonic + (time.time_ns() - time.monotonic_ns())
+        # Convert nanoseconds to seconds and get UTC time
+        utc_time = datetime.datetime.fromtimestamp(frame_time_in_utc / Gst.SECOND)
         # Write the UTC timestamp to the file
         with open("timestamps.txt", "a") as f:
             f.write(f"{utc_time.isoformat()}\n")
@@ -69,8 +78,22 @@ def main():
     except KeyboardInterrupt:
         pass
     finally:
+        print("Shutting down the pipeline")
         # Clean up
+        pipeline.send_event(Gst.Event.new_eos())
+        bus = pipeline.get_bus()
+        while True:
+            msg = bus.timed_pop_filtered(Gst.CLOCK_TIME_NONE, Gst.MessageType.EOS | Gst.MessageType.ERROR)
+            if msg:
+                if msg.type == Gst.MessageType.EOS:
+                    print("Received EOS signal, shutting down gracefully.")
+                    break
+                elif msg.type == Gst.MessageType.ERROR:
+                    err, debug = msg.parse_error()
+                    print("Error received:", err, debug)
+                    break
         pipeline.set_state(Gst.State.NULL)
+        loop.quit()
 
 
 if __name__ == "__main__":
