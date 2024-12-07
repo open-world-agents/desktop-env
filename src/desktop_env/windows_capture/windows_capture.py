@@ -68,6 +68,18 @@ class WindowsCapture(AbstractThread):
 
     # TODO: verify whether stop-join-close lifecycle is correct
     def stop(self):
+        self.pipeline.send_event(Gst.Event.new_eos())
+        bus = self.pipeline.get_bus()
+        while True:
+            msg = bus.timed_pop_filtered(Gst.CLOCK_TIME_NONE, Gst.MessageType.EOS | Gst.MessageType.ERROR)
+            if msg:
+                if msg.type == Gst.MessageType.EOS:
+                    print("Received EOS signal, shutting down gracefully.")
+                    break
+                elif msg.type == Gst.MessageType.ERROR:
+                    err, debug = msg.parse_error()
+                    print("Error received:", err, debug)
+                    break
         self.pipeline.set_state(Gst.State.NULL)
 
     def join(self): ...
@@ -97,6 +109,7 @@ class WindowsCapture(AbstractThread):
             structure.get_value("height"),
             structure.get_value("format"),
         )
+        assert format_ == "BGRA", f"Unsupported format: {format_}"
 
         # Calculate time difference
         current_time = time.time()

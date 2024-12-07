@@ -30,7 +30,7 @@ def on_frame_arrived(frame: FrameStamped):
         frame_arr = frame.frame_arr
 
         # save into file
-        cv2.imwrite(f"frame_{on_frame_arrived.count:02d}.jpg", frame_arr)
+        # cv2.imwrite(f"frame_{on_frame_arrived.count:02d}.jpg", frame_arr)
         on_frame_arrived.last_printed = now
 
 
