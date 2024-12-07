@@ -5,6 +5,10 @@ i5-11400, GTX 1650
 - FHD: full screen, 1920x1080, monitor-index=0
 - small: Task Manager, 1025x577, window-handle=789564
 
+- mfh264enc: mediafoundation(mf), which is from win32 api
+- nvh264enc: nvidia encoder
+- x264: cpu encoder
+
 # Experiments
 
 ```sh
