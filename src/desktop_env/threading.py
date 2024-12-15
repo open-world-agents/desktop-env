@@ -23,6 +23,12 @@ class AbstractThread:
     def join(self): ...
     def close(self): ...
 
+    def stop_join_close(self):
+        """Helper function to stop, join, and close the task."""
+        self.stop()
+        self.join()
+        self.close()
+
 
 class StoppableThread(threading.Thread):
     def __init__(self, *args, **kwargs):

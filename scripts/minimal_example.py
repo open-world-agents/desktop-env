@@ -58,3 +58,5 @@ if __name__ == "__main__":
         desktop.stop()
         desktop.join()
         desktop.close()
+
+        # or you may use desktop.stop_join_close()

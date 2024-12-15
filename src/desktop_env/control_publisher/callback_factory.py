@@ -1,8 +1,8 @@
 import pynput
 from loguru import logger
 
+from ..utils import key_to_vk
 from .msg import KeyboardEvent, MouseEvent
-from .utils import key_to_vk
 
 
 class KeyboardListenerFactory:
