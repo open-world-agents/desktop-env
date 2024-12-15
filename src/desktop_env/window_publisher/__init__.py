@@ -7,6 +7,7 @@ from loguru import logger
 from tqdm import tqdm
 
 from ..threading import AbstractThread
+from .args import WindowPublishArgs
 from .msg import WindowInfo
 
 
@@ -19,6 +20,10 @@ class WindowPublisher(AbstractThread):
         self.pbar = tqdm(total=None, desc="Publishing windows info", dynamic_ncols=True)
         self.stop_event = threading.Event()
         self.callback = callback
+
+    @classmethod
+    def from_args(cls, args: WindowPublishArgs):
+        return cls(args.callback)
 
     def start(self):
         while not self.stop_event.is_set():

@@ -1,8 +1,9 @@
+import importlib
 import time
 
 from .actor import ActorMixin
-from .args import DesktopArgs
 from .control_publisher import ControlPublisher
+from .desktop_args import DesktopArgs
 from .threading import AbstractThread
 from .window_publisher import WindowPublisher
 from .windows_capture import WindowsCapture
@@ -15,20 +16,18 @@ class Desktop(AbstractThread, ActorMixin):
         # Create threads
         self.threads = []
 
-        windows_capture = WindowsCapture(**args.windows_capture_args.model_dump())
+        windows_capture = WindowsCapture.from_args(args.windows_capture_args)
         self.threads.append(windows_capture)
 
-        window_publisher = WindowPublisher(args.window_publisher_args.callback)
+        window_publisher = WindowPublisher.from_args(args.window_publisher_args)
         self.threads.append(window_publisher)
 
-        control_publisher = ControlPublisher(
-            args.control_publisher_args.keyboard_callback, args.control_publisher_args.mouse_callback
-        )
+        control_publisher = ControlPublisher.from_args(args.control_publisher_args)
         self.threads.append(control_publisher)
 
     @classmethod
-    def from_settings(cls, settings: DesktopArgs):
-        return cls(settings)
+    def from_args(cls, args: DesktopArgs):
+        return cls(args)
 
     def start(self):
         self.start_free_threaded()

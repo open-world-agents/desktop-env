@@ -19,7 +19,7 @@ def construct_pipeline(
     window_name: Optional[str] = None,
     monitor_idx: Optional[int] = None,
     additional_parameter_for_screencap="",
-    framerate="20/1",
+    framerate="30/1",
     output_format: Literal["raw", "jpeg"] = "raw",
 ) -> str:
     """Construct a GStreamer pipeline for screen capturing.
@@ -50,11 +50,9 @@ def construct_pipeline(
     assert isinstance(framerate, str), "framerate must be a string, now. (TODO: support other types)"
 
     pipeline_description = (
-        f"{pipeline_src} {src_parameter} {additional_parameter_for_screencap} ! "
-        "videorate ! "
-        f"video/x-raw,framerate={framerate} ! "
-        "videoconvert ! "
-        f"{output_format_to_element(output_format)} ! "
+        f"{pipeline_src} {src_parameter} {additional_parameter_for_screencap} do-timestamp=True ! "
+        "videorate drop-only=True ! " + f"video/x-raw(memory:D3D11Memory),framerate=0/1,max-framerate={framerate} ! "
+        "d3d11download ! " + f"{output_format_to_element(output_format)} ! "
         "appsink name=appsink max-buffers=1 drop=true"
     )
     # max-buffers=1 drop=true: Drop the frame if the buffer is full. it is necessary to prevent memory boom.

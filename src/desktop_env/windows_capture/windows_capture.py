@@ -11,6 +11,7 @@ from gi.repository import GLib, Gst
 from tqdm import tqdm
 
 from ..threading import AbstractThread
+from .args import WindowsCaptureArgs
 from .gst_pipeline import construct_pipeline
 from .msg import FrameStamped
 
@@ -36,7 +37,7 @@ class WindowsCapture(AbstractThread):
 
         # Get the appsink element and set properties
         self.appsink = self.pipeline.get_by_name("appsink")
-        self.appsink.set_property("emit-signals", True)  # This MUST be True
+        self.appsink.set_property("emit-signals", True)  # This MUST be True to capture `new-sample` signal
         self.appsink.set_property("sync", True)  # This should be True, I guess
 
         # Connect to the appsink's new-sample signal
@@ -44,6 +45,10 @@ class WindowsCapture(AbstractThread):
         self.appsink.connect("new-sample", self.on_frame_arrived)
 
         self.loop = GLib.MainLoop()
+
+    @classmethod
+    def from_args(cls, args: WindowsCaptureArgs):
+        return cls(args.on_frame_arrived, pipeline_description=args.pipeline_description)
 
     def start(self):
         """Start the pipeline. This function will block the current thread."""
@@ -61,15 +66,28 @@ class WindowsCapture(AbstractThread):
         self._loop_thread = threading.Thread(target=start_main_loop, args=(self.loop,))
         self._loop_thread.start()
 
+    # TODO: verify whether stop-join-close lifecycle is correct
     def stop(self):
+        self.pipeline.send_event(Gst.Event.new_eos())
+        bus = self.pipeline.get_bus()
+        while True:
+            msg = bus.timed_pop_filtered(Gst.CLOCK_TIME_NONE, Gst.MessageType.EOS | Gst.MessageType.ERROR)
+            if msg:
+                if msg.type == Gst.MessageType.EOS:
+                    print("Received EOS signal, shutting down gracefully.")
+                    break
+                elif msg.type == Gst.MessageType.ERROR:
+                    err, debug = msg.parse_error()
+                    print("Error received:", err, debug)
+                    break
         self.pipeline.set_state(Gst.State.NULL)
 
-    def join(self):
-        if hasattr(self, "_loop_thread"):
-            self._loop_thread.join()
+    def join(self): ...
 
     def close(self):
         self.loop.quit()
+        if hasattr(self, "_loop_thread"):
+            self._loop_thread.join()
         self.pbar.close()
 
     def __on_new_sample(self, sink, callback: Callable):
@@ -85,15 +103,16 @@ class WindowsCapture(AbstractThread):
         # Get the caps of the sample
         caps: Gst.Caps = sample.get_caps()
         structure: Gst.Structure = caps.get_structure(0)
+        # This width and height may be different with Window's width and height
         width, height, format_ = (
             structure.get_value("width"),
             structure.get_value("height"),
             structure.get_value("format"),
         )
-        # print(f"Received frame: {width}x{height} {format_}")
+        assert format_ == "BGRA", f"Unsupported format: {format_}"
 
-        current_time = time.time()
         # Calculate time difference
+        current_time = time.time()
         time_diff = current_time - self._last_time
 
         # Update bandwidth every second

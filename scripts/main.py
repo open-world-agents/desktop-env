@@ -1,7 +1,10 @@
+import functools
+import inspect
 import time
 
 import cv2
 import orjson
+import yaml
 from loguru import logger
 from pydantic import BaseModel
 from tqdm import tqdm
@@ -27,16 +30,35 @@ def on_frame_arrived(frame: FrameStamped):
         frame_arr = frame.frame_arr
 
         # save into file
-        cv2.imwrite(f"frame_{on_frame_arrived.count:02d}.jpg", frame_arr)
+        # cv2.imwrite(f"frame_{on_frame_arrived.count:02d}.jpg", frame_arr)
         on_frame_arrived.last_printed = now
 
 
-def write_event_into_jsonl(event):
+class BagEvent(BaseModel):
+    timestamp_ns: int
+    event_src: str
+    event_data: bytes
+
+
+def write_event_into_jsonl(event, source=None):
+    # you can find where the event is coming from. e.g. where the calling this function
+    # frame = inspect.currentframe().f_back
+
     with open("event.jsonl", "ab") as f:
         if isinstance(event, BaseModel):
-            f.write(event.model_dump_json().encode("utf-8") + b"\n")
+            event_data = event.model_dump_json().encode("utf-8")
         else:
-            f.write(orjson.dumps(event) + b"\n")
+            event_data = orjson.dumps(event)
+        bag_event = BagEvent(timestamp_ns=time.time_ns(), event_src=source, event_data=event_data)
+        f.write(bag_event.model_dump_json().encode("utf-8") + b"\n")
+
+
+def window_publisher_callback(event):
+    write_event_into_jsonl(event, source="window_publisher")
+
+
+def control_publisher_callback(event):
+    write_event_into_jsonl(event, source="control_publisher")
 
 
 if __name__ == "__main__":
@@ -56,16 +78,16 @@ if __name__ == "__main__":
     args = DesktopArgs(
         windows_capture_args={
             "on_frame_arrived": on_frame_arrived,
-            "pipeline_description": construct_pipeline(monitor_idx=1, window_name="작업 관리자"),
+            "pipeline_description": construct_pipeline(monitor_idx=0, framerate="60/1", window_name="작업"),
         },
-        window_publisher_args={"callback": write_event_into_jsonl},
+        window_publisher_args={"callback": window_publisher_callback},
         control_publisher_args={
-            "keyboard_callback": write_event_into_jsonl,
-            "mouse_callback": write_event_into_jsonl,
+            "keyboard_callback": control_publisher_callback,
+            "mouse_callback": control_publisher_callback,
         },
     )
-    print(args.model_dump_json())
-    desktop = Desktop.from_settings(args)
+    args.to_yaml("desktop_args.yaml")
+    desktop = Desktop.from_args(args)
 
     try:
         # Option 1. Start the pipeline in the current thread (blocking)
@@ -79,4 +101,5 @@ if __name__ == "__main__":
         pass
     finally:
         desktop.stop()
+        desktop.join()
         desktop.close()
