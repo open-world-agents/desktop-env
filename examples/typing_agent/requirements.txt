@@ -22,3 +22,4 @@ tqdm
 transformers
 yacs
 bitsandbytes
+openai
