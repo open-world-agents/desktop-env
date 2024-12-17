@@ -74,6 +74,38 @@ The agent will:
 python ztype_agent.py
 ```
 
+### Docker
+
+WSL + Docker + lmdeploy openai compatible server
+
+1. Install desktop-env
+2. Build InternVL_Dockerfile
+
+```bash
+docker build -t internvl-custom:latest -f InternVL_Dockerfile .
+```
+
+3. .env config & docker-compose
+   - Copy `env.example` to `.env`
+     ```bash
+     cp .env.example .env
+     ```
+   - Edit `.env` and add your HF token:
+     ```env
+     HUGGING_FACE_HUB_TOKEN=your_actual_token_here
+     ```
+4. Now docker up
+
+```bash
+docker-compose up
+```
+
+5. Then enjoy python!
+
+```bash
+python ztype_agent_wsl_docker.py
+```
+
 ## Implementation Details
 
 ### Frame Processing

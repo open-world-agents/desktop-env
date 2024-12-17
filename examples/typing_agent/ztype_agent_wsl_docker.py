@@ -83,7 +83,7 @@ IMPORTANT: Don't add any additional explanation - just respond with the word pos
         import base64
         base64_image = base64.b64encode(img_byte_arr).decode("utf-8")
 
-        time.sleep(0.3)
+        time.sleep(0.1)
 
         # Process with VLM and extract detected word
         logger.info("Sending frame to VLM...")
