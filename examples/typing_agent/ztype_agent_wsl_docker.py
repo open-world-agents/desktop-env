@@ -83,7 +83,7 @@ IMPORTANT: Don't add any additional explanation - just respond with the word pos
         import base64
         base64_image = base64.b64encode(img_byte_arr).decode("utf-8")
 
-        time.sleep(0.1)
+        time.sleep(1)
 
         # Process with VLM and extract detected word
         logger.info("Sending frame to VLM...")
@@ -92,15 +92,11 @@ IMPORTANT: Don't add any additional explanation - just respond with the word pos
                 model=self.model,
                 messages=[
                     {
-                        "role": "system",
-                        "content": self.system_prompt
-                    },
-                    {
                         "role": "user",
                         "content": [
                             {
                                 "type": "text",
-                                "text": "Here is the screenshot of the game screen:"
+                                "text": self.system_prompt
                             },
                             {
                                 "type": "image_url",
