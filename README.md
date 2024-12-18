@@ -1,72 +1,90 @@
-# desktop-env
+# 🖥️ desktop-env
 
-A real-time, high-frequency, real-world desktop environment that is suitable for desktop-based ML development (agents, world models, etc.)
+**`desktop-env`** is a cutting-edge, **real-time** desktop environment designed specifically for desktop-based machine learning development — perfect for creating agents, world models, and more.
 
-Currently, in open-source agent research, three things are missing:
+---
 
-1. **Open-source environments**
-2. **Open-source data**
-3. **Open-source research**
+## 🎯 Why Choose `desktop-env`?
 
-`desktop-env` addresses (1) the issue of open-source environments by providing a desktop-based environment, and solves (2) the problem of open-source data by offering a `recorder`. We plan to tackle (3) the issue of open-source research in a new repository in the future.
+In the realm of open-source agent research, three critical components are often missing:
 
-## Key Features
+1. **🌐 Open-Source Environments**
+2. **📊 Open-Source Data**
+3. **🔎 Open-Source Research Codebases & Repositories**
 
-- **real-time**: supports **sub-1ms** latency for screen capture
-- **high-frequency**: supports **over 144fps** screen capture with **almost no** CPU/GPU load, utilizing Windows API(`DXGI/WGC`, utilizing extremely powerful and versatile framework for creating streaming media applications: `gstreamer`)
-- **real-world**: Because it is identical to the desktop environment that humans actually use, you can collect data obtained from human desktop usage directly and utilize it as is for agents
+`desktop-env` is here to fill these gaps:
 
-Currently, `desktop-env` supports following desktop events:
+- 🖥️ **Open-Source Environment**: Provides a rich, desktop-based environment identical to what humans use daily.
+- 📈 **Data Recorder**: Includes a built-in [recorder](examples/recorder/) to capture and utilize real human desktop interactions.
+- 🤝 **Future Research Collaboration**: Plans are underway to foster open-source research in *a new repository*.
 
-- screen: screen on your monitor, you can specific monitor index, windows name, framerate
-- keyboard/mouse: it can capture your keyboard/mouse input and also can input them
-- window: active window's name, bbox, hWnd
+---
 
-Currently, `desktop-env` supports the following OS: **Windows**. Since the main goal of `desktop-env` is to provide an efficiently optimized environment capable of running even real-time games, support for other operating systems will be added a bit more slowly.
+## 🔑 Key Features
 
-## Screen Capture Benchmark
+- ⚡ **Real-Time Performance**: Achieve **sub-1ms latency** in screen capture.
+- 🎥 **High-Frequency Capture**: Supports **over 144 FPS** screen recording with **minimal CPU/GPU load**.
+  - Utilizes Windows APIs (`DXGI/WGC`) and the powerful [GStreamer](https://gstreamer.freedesktop.org/) framework.
+- 🖱️ **Authentic Desktop Interaction**: Work within the exact desktop environment used by real users.
 
-Measured in i5-11400, GTX 1650.
-Except `desktop-env`, the time is measure by `python3 -m pyscreenshot.check.speedtest --childprocess 0` of [pyscreenshot](https://github.com/ponty/pyscreenshot)
+### Supported Desktop Events:
 
-| Library       | Average Time per Frame | Times Slower than `desktop-env` |
-|---------------|------------------------|---------------------------------|
-| `desktop-env` | **5.7 ms**             | 1×                              |
-| `pyscreenshot`| 33 ms                  | 5.8×                            |
-| `PIL`         | 34 ms                  | 6.0×                            |
-| `MSS`         | 37 ms                  | 6.5×                            |
-| `PyQt5`       | 137 ms                 | 24×                             |
+- 📺 **Screen**: Capture your monitor screen; specify monitor index, window name, framerate.
+- ⌨️🖱️ **Keyboard/Mouse**: Capture and input keyboard and mouse events.
+- 🪟 **Window**: Get active window's name, bounding box, and handle (`hWnd`).
 
-## Demo
+🚨 **Note**: Currently, `desktop-env` supports **Windows** OS. Since the main goal is to provide an efficiently optimized environment capable of running even real-time games, support for other operating systems will be added gradually.
+
+---
+
+## 🚀 Blazing Performance
+
+`desktop-env` outperforms other screen capture libraries:
+
+| Library         | Avg. Time per Frame | Relative Speed    |
+|-----------------|---------------------|-------------------|
+| **desktop-env** | **5.7 ms**          | **1× (Fastest)**  |
+| `pyscreenshot`  | 33 ms               | 🚶‍♂️ 5.8× slower    |
+| `PIL`           | 34 ms               | 🚶‍♂️ 6.0× slower    |
+| `MSS`           | 37 ms               | 🚶‍♂️ 6.5× slower    |
+| `PyQt5`         | 137 ms              | 🐢 24× slower      |
+
+*Measured on i5-11400, GTX 1650.* Not only is FPS measured, but CPU/GPU resource usage is also **significantly lower**.
+
+---
+
+## 💡 Examples
+
+### 🎮 Working Demo
 
 https://github.com/user-attachments/assets/4aee4580-179d-4e57-b876-0dd5256bb9c5
 
-For more detail with self-contained running source code, see [examples/typing_agent](https://github.com/open-world-agents/desktop-env/tree/main/examples/typing_agent)
+For more details with self-contained running source code, see [examples/typing_agent](https://github.com/open-world-agents/desktop-env/tree/main/examples/typing_agent).
 
-## Example usage
+### 👩‍💻 Example Usage
 
-For full runnable script, see `scripts/minimal_example.py`
-```py
+For full runnable scripts, see `scripts/minimal_example.py`, `scripts/main.py`.
+
+```python
 from desktop_env import Desktop, DesktopArgs
 from desktop_env.msg import FrameStamped
 from desktop_env.windows_capture import construct_pipeline
 
 def on_frame_arrived(frame: FrameStamped):
-    # Frame arrived at 1733368006665481600, latency: 0.00 ms, frame shape: (2000, 3000, 4)
-
+    # Frame arrived at {frame.timestamp}, latency: {latency} ms, frame shape: {frame.shape}
+    pass
 
 def on_event(event):
-    # event_type='on_press' event_data=162 event_time=1733368006688750600 device_name='keyboard'
-    # title='windows_capture.py - desktop-env - Visual Studio Code' rect=(527, -1096, 2479, -32) hWnd=1379722
-    # event_type='on_move' event_data=(1323, -154) event_time=1733368048442994300 device_name='mouse'
-
+    # event_type='{event.type}' event_data={event.data} event_time={event.time} device_name='{event.device}'
+    # title='{event.title}' rect={event.rect} hWnd={event.hWnd}
+    pass
 
 if __name__ == "__main__":
     args = DesktopArgs(
         windows_capture_args={
             "on_frame_arrived": on_frame_arrived,
             "pipeline_description": construct_pipeline(
-                window_name=None,  # you may substring of the window name
+                window_name=None,  # you may specify a substring of the window name
                 monitor_idx=None,  # you may specify the monitor index
                 framerate="60/1",
             ),
@@ -77,10 +95,10 @@ if __name__ == "__main__":
     desktop = Desktop.from_args(args)
 
     try:
-        # Option 1. Start the pipeline in the current thread (blocking)
+        # Option 1: Start the pipeline in the current thread (blocking)
         # desktop.start()
 
-        # Option 2. Start the pipeline in a separate thread (non-blocking)
+        # Option 2: Start the pipeline in a separate thread (non-blocking)
         desktop.start_free_threaded()
         while True:
             time.sleep(1)
@@ -90,36 +108,34 @@ if __name__ == "__main__":
         desktop.stop()
         desktop.join()
         desktop.close()
-
 ```
 
+---
 
-## Recorder
+## 🛠️ Installation
 
-We also provide a simple `recorder` for collecting desktop data. We'll provide this within few week.
+**Prerequisites**: Install `poetry` first. See the [Poetry Installation Guide](https://python-poetry.org/docs/).
 
+Install `desktop-env` with the following commands:
 
-## Installation
-
-You should install `poetry` first: see [poetry installation guide](https://python-poetry.org/docs/)
-
-
-You can install `desktop-env` with following command.
-
-```
+```bash
 conda install -c conda-forge pygobject -y
 conda install -c conda-forge gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly -y
 
 poetry install
 ```
 
-Note: Installing `pygobject` with pip causes `..\meson.build:31:9: ERROR: Dependency 'gobject-introspection-1.0' is required but not found.`
-
-After installation, you may verify installation with following comand.
-- gstreamer version >= 1.24.6
-- Direct3D11 plugin is installed
-
+🚨 **Note**: Installing `pygobject` with `pip` causes the error:
 ```
+..\meson.build:31:9: ERROR: Dependency 'gobject-introspection-1.0' is required but not found.
+```
+
+After installation, verify it with the following commands:
+
+- Ensure GStreamer version >= 1.24.6
+- Confirm the Direct3D11 plugin is installed
+
+```bash
 $ conda list gst-*
 # packages in environment at C:\Users\...\miniconda3\envs\agent:
 #
@@ -129,7 +145,8 @@ gst-plugins-base          1.24.6               hb0a98b8_0    conda-forge
 gst-plugins-good          1.24.6               h3b23867_0    conda-forge
 gst-plugins-ugly          1.24.6               ha7af72c_0    conda-forge
 gstreamer                 1.24.6               h5006eae_0    conda-forge
-$  gst-inspect-1.0.exe d3d11
+
+$ gst-inspect-1.0.exe d3d11
 Plugin Details:
   Name                     d3d11
   Description              Direct3D11 plugin
@@ -144,17 +161,19 @@ Plugin Details:
 
   d3d11colorconvert: Direct3D11 Colorspace Converter
   d3d11compositor: Direct3D11 Compositor
-...
+  ...
   d3d11screencapturesrc: Direct3D11 Screen Capture Source
-...
+  ...
 ```
 
+---
 
+## 📝 TODOs
 
-## TODOs
+- [ ] 🖥️ Validate overall modality matching in multi-monitor setting
+- [ ] 🌐 Implement remote desktop control demo that wraps up Desktop and exposes network interface through UDP/TCP, HTTP/WebSocket, etc.
+- [ ] 🎥 Support various video formats besides raw RGBA (JPEG, H.264, ...)
+- [ ] 🐧🍎 Add multi-OS support (Linux & macOS)
+- [ ] 💬 Implement language interfaces to support desktop agents written in various languages
 
-- [ ] validate overall modality's matching in multi-monitor setting
-- [ ] remote desktop control demo that wraps up Desktop and expose network interface through udp/tcp, http/websocket, ...
-- [ ] support various video format besides raw RGBA (jpeg, h264, ...)
-- [ ] multi-os support(Linux & MacOS)
-- [ ] language interface implementation to supports existing many, many langauge based desktop agents
+---
