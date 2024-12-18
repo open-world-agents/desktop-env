@@ -18,6 +18,9 @@ In the realm of open-source agent research, three critical components are often 
 - 📈 **Data Recorder**: Includes a built-in [recorder](examples/recorder/) to capture and utilize real human desktop interactions.
 - 🤝 **Future Research Collaboration**: Plans are underway to foster open-source research in *a new repository*.
 
+
+**Any kind of open-source contributions are always welcome.**
+
 ---
 
 ## 🔑 Key Features
