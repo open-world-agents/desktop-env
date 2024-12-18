@@ -21,7 +21,8 @@ DEBUG = False # set to True for debugging
 ZTYPE_WINDOW_NAME = "ZType – Typing Game"  # ZType – Typing Game - Type to Shoot - Chrome
 
 # Shared queue between agent and actor for passing detected words
-word_queue = Queue()
+MAX_QUEUE_SIZE = 3
+word_queue = Queue(maxsize=MAX_QUEUE_SIZE)
 
 
 class ZTypeAgent(AbstractThread):
@@ -39,6 +40,7 @@ class ZTypeAgent(AbstractThread):
 If there is a word highlighted alone in orange, prioritize reading that word exactly as it appears.
 If else, among the visible words on screen, tell me the one that appears furthest down (it could be a single letter).
 Although letters may overlap, focus only on the word that appears in the foremost layer.
+{last_word_instruction}
 IMPORTANT: Don't add any additional explanation - just respond with the word positioned lowest on screen"""
 
         # Queue for frame processing - only keeps latest frame to avoid lag
@@ -46,6 +48,8 @@ IMPORTANT: Don't add any additional explanation - just respond with the word pos
         self.frame_lock = threading.Lock()  # To ensure thread safety
 
         self.stop_event = threading.Event()
+        self.is_processing = threading.Event()  # check if currently processing
+        self.last_word = None  # last word detected
 
     def on_frame_arrived(self, frame: FrameStamped):
         """Callback for new frames - updates frame queue with latest frame only."""
@@ -56,73 +60,98 @@ IMPORTANT: Don't add any additional explanation - just respond with the word pos
 
     def process_frame(self, frame: FrameStamped):
         """Process a single frame through VLM to detect words."""
-        # Save frame for debugging if enabled
-        if DEBUG:
-            frame_rgb = cv2.cvtColor(frame.frame_arr, cv2.COLOR_BGRA2RGB)
-            debug_image = Image.fromarray(frame_rgb)
-            debug_image.save("debug_frame.png")
-            logger.info("Saved debug frame to debug_frame.png")
+        # if currently processing, skip new frame
+        if self.is_processing.is_set():
+            logger.debug("Skipping frame - currently processing")
+            return
 
-        # Log frame info for debugging
-        logger.info(f"Processing frame with shape: {frame.frame_arr.shape}")
-
-        # Convert frame to format required by VLM
-        frame_rgb = cv2.cvtColor(frame.frame_arr, cv2.COLOR_BGRA2RGB)
-        pil_image = Image.fromarray(frame_rgb)
-        # resize image to 448x448
-        pil_image = pil_image.resize((448, 448))
-        logger.info("Converted frame to PIL Image")
-
-        # Save image to bytes
-        import io
-        img_byte_arr = io.BytesIO()
-        pil_image.save(img_byte_arr, format="PNG")
-        img_byte_arr = img_byte_arr.getvalue()
-
-        # Encode image to base64
-        import base64
-        base64_image = base64.b64encode(img_byte_arr).decode("utf-8")
-
-        time.sleep(1)
-
-        # Process with VLM and extract detected word
-        logger.info("Sending frame to VLM...")
+        self.is_processing.set()
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": self.system_prompt
-                            },
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/png;base64,{base64_image}"
-                                }
-                            }
-                        ]
-                    }
-                ],
-                max_tokens=20,  # Keep response short since we only need the word
-                stream=False
+            # Save frame for debugging if enabled
+            if DEBUG:
+                frame_rgb = cv2.cvtColor(frame.frame_arr, cv2.COLOR_BGRA2RGB)
+                debug_image = Image.fromarray(frame_rgb)
+                debug_image.save("debug_frame.png")
+                logger.info("Saved debug frame to debug_frame.png")
+
+            # Log frame info for debugging
+            logger.info(f"Processing frame with shape: {frame.frame_arr.shape}")
+
+            # Convert frame to format required by VLM
+            frame_rgb = cv2.cvtColor(frame.frame_arr, cv2.COLOR_BGRA2RGB)
+            pil_image = Image.fromarray(frame_rgb)
+            # resize image to 448x448
+            pil_image = pil_image.resize((448, 448))
+            logger.info("Converted frame to PIL Image")
+
+            # Save image to bytes
+            import io
+            img_byte_arr = io.BytesIO()
+            pil_image.save(img_byte_arr, format="PNG")
+            img_byte_arr = img_byte_arr.getvalue()
+
+            # Encode image to base64
+            import base64
+            base64_image = base64.b64encode(img_byte_arr).decode("utf-8")
+
+            time.sleep(1)
+
+            # Add instruction to ignore last word if it's detected
+            last_word_instruction = ""
+            if self.last_word:
+                last_word_instruction = f'Ignore the word "{self.last_word}" if you see it.'
+            
+            current_prompt = self.system_prompt.format(
+                last_word_instruction=last_word_instruction
             )
 
-            logger.info(f"Raw VLM response: {response}")
-            
-            if response.choices and response.choices[0].message.content:
-                word = response.choices[0].message.content.strip()
-                logger.info(f"Detected word: {word}")
-                word_queue.put_nowait(word)
-            else:
-                logger.warning("No word detected in response")
-        except Exception as e:
-            logger.error(f"Error processing frame with Vision API: {e}")
-            logger.exception("Vision API processing error details:")
-            time.sleep(1)
+            # Process with VLM and extract detected word
+            logger.info("Sending frame to VLM...")
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": current_prompt
+                                },
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:image/png;base64,{base64_image}"
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    max_tokens=20,  # Keep response short since we only need the word
+                    stream=False
+                )
+
+                logger.info(f"Raw VLM response: {response}")
+                
+                if response.choices and response.choices[0].message.content:
+                    word = response.choices[0].message.content.strip()
+                    if word != self.last_word:  # 마지막 단어와 다른 경우에만 처리
+                        logger.info(f"Detected word: {word}")
+                        try:
+                            word_queue.put_nowait((time.time(), word))
+                            self.last_word = word  # 새로운 단어를 마지막 단어로 저장
+                        except Full:
+                            logger.warning("Word queue is full, skipping new word")
+                    else:
+                        logger.debug(f"Skipping repeated word: {word}")
+                else:
+                    logger.warning("No word detected in response")
+            except Exception as e:
+                logger.error(f"Error processing frame with Vision API: {e}")
+                logger.exception("Vision API processing error details:")
+                time.sleep(1)
+        finally:
+            self.is_processing.clear()
 
     def start(self):
         while not self.stop_event.is_set():
@@ -149,6 +178,7 @@ class ZtypeActor(AbstractThread):
     def __init__(self, desktop: Desktop):
         self.stop_event = threading.Event()
         self.desktop = desktop
+        self.word_timeout = 2.0  # 2초 이상 된 단어는 무시
 
     @when_active(ZTYPE_WINDOW_NAME)
     def type_word(self, word: str):
@@ -168,7 +198,11 @@ class ZtypeActor(AbstractThread):
     def start(self):
         while not self.stop_event.is_set():
             try:
-                word = word_queue.get(timeout=1)
+                timestamp, word = word_queue.get(timeout=1)
+                # ignore old words
+                if time.time() - timestamp > self.word_timeout:
+                    logger.warning(f"Skipping old word: {word}")
+                    continue
                 self.type_word(word)
             except Empty:
                 continue
