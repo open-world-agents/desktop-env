@@ -29,13 +29,13 @@ Currently, `desktop-env` supports the following OS: **Windows**. Since the main 
 Measured in i5-11400, GTX 1650.
 Except `desktop-env`, the time is measure by `python3 -m pyscreenshot.check.speedtest --childprocess 0` of [pyscreenshot](https://github.com/ponty/pyscreenshot)
 
-| Library      | Average Time per Frame | Times Slower than `desktop-env` |
-|--------------|------------------------|---------------------------------|
-| `desktop-env`| **5.7 ms**             | 1×                              |
-| `default`    | 33 ms                  | 5.8×                            |
-| `PIL`        | 34 ms                  | 6.0×                            |
-| `MSS`        | 37 ms                  | 6.5×                            |
-| `PyQt5`      | 137 ms                 | 24×                             |
+| Library       | Average Time per Frame | Times Slower than `desktop-env` |
+|---------------|------------------------|---------------------------------|
+| `desktop-env` | **5.7 ms**             | 1×                              |
+| `pyscreenshot`| 33 ms                  | 5.8×                            |
+| `PIL`         | 34 ms                  | 6.0×                            |
+| `MSS`         | 37 ms                  | 6.5×                            |
+| `PyQt5`       | 137 ms                 | 24×                             |
 
 
 ## Example usage
