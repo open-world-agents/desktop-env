@@ -201,7 +201,7 @@ if __name__ == "__main__":
             "on_frame_arrived": on_frame_arrived,
             "pipeline_description": construct_pipeline(
                 window_name=ZTYPE_WINDOW_NAME,
-                framerate="4/1",  # Reduced framerate because VLM processing is slow
+                framerate="4/1",  # Reduced framerate because VLM does not require high-frequency input, but you may specify 60+ fps
             ),
         },
         window_publisher_args={"callback": "desktop_env.args.callback_sink"},

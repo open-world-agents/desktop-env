@@ -50,7 +50,7 @@ args = DesktopArgs(
         "on_frame_arrived": on_frame_arrived,
         "pipeline_description": construct_pipeline(
             window_name=ZTYPE_WINDOW_NAME,
-            framerate="4/1",  # Reduced framerate because VLM processing is slow
+            framerate="4/1",  # Reduced framerate because VLM does not require high-frequency input, but you may specify 60+ fps
         ),
     },
 )
@@ -58,8 +58,6 @@ args = DesktopArgs(
 - Captures game window frames
 - Configurable framerate to balance performance
 - Queues frames for processing
-
-### Keyboard Control
 
 ```python
 def type_word(self, word: str):
