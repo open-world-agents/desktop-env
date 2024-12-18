@@ -24,10 +24,10 @@ In the realm of open-source agent research, three critical components are often 
 
 - ⚡ **Real-Time Performance**: Achieve **sub-1ms latency** in screen capture.
 - 🎥 **High-Frequency Capture**: Supports **over 144 FPS** screen recording with **minimal CPU/GPU load**.
-  - Utilizes Windows APIs (`DXGI/WGC`) and the powerful [GStreamer](https://gstreamer.freedesktop.org/) framework.
+  - Utilizes Windows APIs (`DXGI/WGC`) and the powerful [GStreamer](https://gstreamer.freedesktop.org/) framework, which differ from `PIL.ImageGrab`, `mss`, ...
 - 🖱️ **Authentic Desktop Interaction**: Work within the exact desktop environment used by real users.
 
-### Supported Desktop Events:
+### Supported Desktop Events & Interfaces:
 
 - 📺 **Screen**: Capture your monitor screen; specify monitor index, window name, framerate.
 - ⌨️🖱️ **Keyboard/Mouse**: Capture and input keyboard and mouse events.
