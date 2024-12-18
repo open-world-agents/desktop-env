@@ -16,14 +16,14 @@ class WindowPublisher(AbstractThread):
 
     FPS = 4
 
-    def __init__(self, callback: Callable):
-        self.pbar = tqdm(total=None, desc="Publishing windows info", dynamic_ncols=True)
+    def __init__(self, callback: Callable, verbose: bool):
+        self.pbar = tqdm(total=None, desc="Publishing windows info", dynamic_ncols=True, disable=not verbose)
         self.stop_event = threading.Event()
         self.callback = callback
 
     @classmethod
     def from_args(cls, args: WindowPublishArgs):
-        return cls(args.callback)
+        return cls(args.callback, args.verbose)
 
     def start(self):
         while not self.stop_event.is_set():

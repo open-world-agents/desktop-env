@@ -2,7 +2,7 @@ import time
 from typing import Callable
 
 import pynput
-from tqdm import tqdm
+from loguru import logger
 
 from ..threading import AbstractThread
 from .args import ControlPublishArgs
@@ -11,7 +11,6 @@ from .callback_factory import KeyboardListenerFactory, MouseListenerFactory
 
 class ControlPublisher(AbstractThread):
     def __init__(self, keyboard_callback: Callable, mouse_callback: Callable):
-        self.pbar = tqdm(total=None, desc="Publishing captured control(keyboard/mouse)", dynamic_ncols=True)
         self.keyboard_callback = keyboard_callback
         self.mouse_callback = mouse_callback
         self._listeners = {}
