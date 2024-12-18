@@ -6,6 +6,7 @@ import time
 from queue import Empty, Full, Queue
 
 import cv2
+import requests
 from loguru import logger
 from openai import OpenAI
 from PIL import Image
@@ -29,8 +30,7 @@ DEBUG = False  # set to True for debugging
 ZTYPE_WINDOW_NAME = "ZType – Typing Game"  # Adjust based on the actual window title
 
 # Shared queue between the agent and actor for passing detected words
-MAX_QUEUE_SIZE = 3
-word_queue = Queue(maxsize=MAX_QUEUE_SIZE)
+word_queue = Queue(maxsize=3)
 
 # Queue for frame processing - only keeps the latest frame to avoid lag
 frame_queue = Queue(maxsize=1)
@@ -43,6 +43,16 @@ def on_frame_arrived(frame: FrameStamped):
         if frame_queue.full():
             frame_queue.get()  # Remove the oldest frame if queue is full
         frame_queue.put(frame)  # Add the new frame to the queue
+
+
+# Health check to http://localhost:23333/health, set timeout to 3 seconds
+try:
+    response = requests.get("http://localhost:23333/health", timeout=3)
+    response.raise_for_status()
+except requests.exceptions.RequestException as e:
+    logger.error(f"Error connecting to Vision API: {e}")
+    logger.error("Ensure the Vision API is running and accessible at http://localhost:23333")
+    exit(1)
 
 
 class ZTypeAgent(AbstractThread):
@@ -202,7 +212,7 @@ if __name__ == "__main__":
             "on_frame_arrived": on_frame_arrived,
             "pipeline_description": construct_pipeline(
                 window_name=ZTYPE_WINDOW_NAME,
-                framerate="1/1",  # Reduce framerate to avoid overwhelming the VLM
+                framerate="4/1",  # Reduced framerate because VLM does not require high-frequency input, but you may specify 60+ fps
             ),
         },
         window_publisher_args={"callback": "desktop_env.args.callback_sink"},
@@ -229,6 +239,7 @@ if __name__ == "__main__":
         pass
     finally:
         # Ensure clean shutdown of all components.
+        # For graceful shutdown, ensure the actor-agent-desktop is stopped in the order.
         actor.stop_join_close()
         agent.stop_join_close()
         desktop.stop_join_close()
