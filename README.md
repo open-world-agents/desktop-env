@@ -24,6 +24,20 @@ Currently, `desktop-env` supports following desktop events:
 
 Currently, `desktop-env` supports the following OS: **Windows**. Since the main goal of `desktop-env` is to provide an efficiently optimized environment capable of running even real-time games, support for other operating systems will be added a bit more slowly.
 
+## Screen Capture Benchmark
+
+Measured in i5-11400, GTX 1650.
+Except `desktop-env`, the time is measure by `python3 -m pyscreenshot.check.speedtest --childprocess 0` of [pyscreenshot](https://github.com/ponty/pyscreenshot)
+
+| Library      | Average Time per Frame | Times Slower than `desktop-env` |
+|--------------|------------------------|---------------------------------|
+| `desktop-env`| **5.7 ms**             | 1×                              |
+| `default`    | 33 ms                  | 5.8×                            |
+| `PIL`        | 34 ms                  | 6.0×                            |
+| `MSS`        | 37 ms                  | 6.5×                            |
+| `PyQt5`      | 137 ms                 | 24×                             |
+
+
 ## Example usage
 
 For full runnable script, see `scripts/minimal_example.py`
@@ -138,3 +152,4 @@ Plugin Details:
 - [ ] remote desktop control demo that wraps up Desktop and expose network interface through udp/tcp, http/websocket, ...
 - [ ] support various video format besides raw RGBA (jpeg, h264, ...)
 - [ ] multi-os support(Linux & MacOS)
+- [ ] language interface implementation to supports existing many, many langauge based desktop agents
