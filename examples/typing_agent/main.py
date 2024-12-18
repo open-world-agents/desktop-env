@@ -29,8 +29,7 @@ DEBUG = False  # set to True for debugging
 ZTYPE_WINDOW_NAME = "ZType – Typing Game"  # Adjust based on the actual window title
 
 # Shared queue between the agent and actor for passing detected words
-MAX_QUEUE_SIZE = 3
-word_queue = Queue(maxsize=MAX_QUEUE_SIZE)
+word_queue = Queue(maxsize=3)
 
 # Queue for frame processing - only keeps the latest frame to avoid lag
 frame_queue = Queue(maxsize=1)
@@ -202,7 +201,7 @@ if __name__ == "__main__":
             "on_frame_arrived": on_frame_arrived,
             "pipeline_description": construct_pipeline(
                 window_name=ZTYPE_WINDOW_NAME,
-                framerate="1/1",  # Reduce framerate to avoid overwhelming the VLM
+                framerate="4/1",  # Reduced framerate because VLM processing is slow
             ),
         },
         window_publisher_args={"callback": "desktop_env.args.callback_sink"},
@@ -229,6 +228,7 @@ if __name__ == "__main__":
         pass
     finally:
         # Ensure clean shutdown of all components.
+        # For graceful shutdown, ensure the actor-agent-desktop is stopped in the order.
         actor.stop_join_close()
         agent.stop_join_close()
         desktop.stop_join_close()

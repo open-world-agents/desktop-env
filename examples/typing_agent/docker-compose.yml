@@ -3,13 +3,15 @@ version: "3.5"
 services:
   lmdeploy:
     container_name: lmdeploy
-    image: internvl-custom:latest
+    build:
+      context: .
+      dockerfile: intern_vl.dockerfile
     ports:
       - "23333:23333"
     environment:
       - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}
     volumes:
-      - ~/.cache/huggingface:/root/.cache/huggingface
+      - ${HOME}/.cache/huggingface:/root/.cache/huggingface
     stdin_open: true
     tty: true
     ipc: host
