@@ -81,6 +81,12 @@ We also provide a simple `recorder` for collecting desktop data. We'll provide t
 
 
 ## Installation
+
+You should install `poetry` first: see [poetry installation guide](https://python-poetry.org/docs/)
+
+
+You can install `desktop-env` with following command.
+
 ```
 conda install -c conda-forge pygobject -y
 conda install -c conda-forge gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly -y
