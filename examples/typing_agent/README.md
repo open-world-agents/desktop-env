@@ -2,6 +2,13 @@
 
 An AI agent that plays [ZType](https://zty.pe/) - a typing game where you shoot down enemies by typing words. The agent uses [InternVL2.5-1B](https://huggingface.co/OpenGVLab/InternVL2_5-1B) Vision Language Model to detect words and simulates keyboard inputs to play the game.
 
+## Key Features
+
+- Real-time, (1B VLM)
+- on-device, (RTX 4070 laptop)
+- train-free, (no fine-tuning)
+- interactive game agent! (ztype)
+
 ## How It Works
 
 1. **Screen Capture**: Continuously captures frames from the ZType game window
@@ -47,34 +54,7 @@ for char in word.lower():
 
 ## Usage
 
-### Native Windows
-
-Pure windows installation guide (without WSL).
-No dockerized setup.
-
-1. Install dependencies:
-
-```bash
-conda create -n owa python=3.11 -y
-conda activate owa
-
-conda install pytorch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 pytorch-cuda=12.4 -c pytorch -c nvidia
-pip install packaging ninja
-pip install flash-attn --no-build-isolation
-pip install lmdeploy
-```
-
-The agent will:
-
-- Start capturing the game window
-- Detect and type words for 150 seconds
-- Automatically clean up and exit
-
-```bash
-python ztype_agent.py
-```
-
-### Docker
+### Docker (Recommended)
 
 WSL + Docker + lmdeploy openai compatible server
 
@@ -106,6 +86,33 @@ docker-compose up
 python ztype_agent_wsl_docker.py
 ```
 
+### Native Windows
+
+Pure windows installation guide (without WSL).
+No dockerized setup.
+
+1. Install dependencies:
+
+```bash
+conda create -n owa python=3.11 -y
+conda activate owa
+
+conda install pytorch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 pytorch-cuda=12.4 -c pytorch -c nvidia
+pip install packaging ninja
+pip install flash-attn --no-build-isolation
+pip install lmdeploy
+```
+
+The agent will:
+
+- Start capturing the game window
+- Detect and type words for 150 seconds
+- Automatically clean up and exit
+
+```bash
+python ztype_agent.py
+```
+
 ## Implementation Details
 
 ### Frame Processing
@@ -132,3 +139,28 @@ python ztype_agent_wsl_docker.py
 - Python 3.11+
 - Browser with ZType game open
 - GPU recommended for VLM performance (tested on rtx 4070 laptop)
+
+## System Architecture
+
+### Sequence Diagram
+
+![ZType Agent Sequence Diagram](assets/owa-ztype-sequence-uml.png)
+
+The sequence diagram above illustrates the interaction between different components:
+
+1. **Initialization Phase**
+
+   - ZTypeAgent initializes OpenAI client with local VLM endpoint
+   - ZtypeActor initializes with Desktop instance
+
+2. **Main Game Loop**
+
+   - Desktop Capture takes screenshots every 1 second
+   - Agent processes frames through VLM
+   - Detected words are queued for typing
+   - Actor types words using keyboard simulation
+
+3. **Key Interactions**
+   - Frame processing with duplicate prevention
+   - Word expiration checking
+   - Natural typing simulation with key press/release events
