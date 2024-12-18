@@ -17,6 +17,8 @@ from desktop_env.windows_capture import construct_pipeline
 logger.remove()
 logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
 
+logger.enable("desktop_env")  # it's optional to enable the logger; just for debugging
+
 
 def on_frame_arrived(frame: FrameStamped):
     # Every 2 seconds, print the timestamp and latency of the frame
@@ -78,7 +80,11 @@ if __name__ == "__main__":
     args = DesktopArgs(
         windows_capture_args={
             "on_frame_arrived": on_frame_arrived,
-            "pipeline_description": construct_pipeline(monitor_idx=0, framerate="60/1", window_name="작업"),
+            "pipeline_description": construct_pipeline(
+                window_name=None,  # you may substring of the window name
+                monitor_idx=None,  # you may specify the monitor index
+                framerate="60/1",
+            ),
         },
         window_publisher_args={"callback": window_publisher_callback},
         control_publisher_args={

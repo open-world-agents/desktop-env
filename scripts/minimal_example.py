@@ -11,6 +11,8 @@ from desktop_env.windows_capture import construct_pipeline
 logger.remove()
 logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
 
+logger.enable("desktop_env")  # it's optional to enable the logger; just for debugging
+
 
 def on_frame_arrived(frame: FrameStamped):
     latency = (time.time_ns() - frame.timestamp_ns) / 1e6
