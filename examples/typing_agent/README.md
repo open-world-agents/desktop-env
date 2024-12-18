@@ -1,6 +1,6 @@
 # ZType Game Agent with Vision Language Model
 
-https://github.com/open-world-agents/desktop-env/raw/refs/heads/main/examples/typing_agent/assets/owa-ztype-demo.mp4
+https://github.com/user-attachments/assets/4aee4580-179d-4e57-b876-0dd5256bb9c5
 
 (4x speed video, works smoothly even with long sequences spanning multiple minutes)
 
