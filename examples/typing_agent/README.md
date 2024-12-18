@@ -58,7 +58,7 @@ for char in word.lower():
 
 WSL + Docker + lmdeploy openai compatible server
 
-1. Install desktop-env
+1. [Install `desktop-env`](https://github.com/open-world-agents/desktop-env?tab=readme-ov-file#installation)
 2. Build InternVL_Dockerfile
 
 ```bash
@@ -83,6 +83,7 @@ docker-compose up
 5. Then enjoy python!
 
 ```bash
+poetry install --no-root
 python ztype_agent_wsl_docker.py
 ```
 
@@ -101,6 +102,8 @@ conda install pytorch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 pytorch-cuda=
 pip install packaging ninja
 pip install flash-attn --no-build-isolation
 pip install lmdeploy
+
+poetry install --no-root
 ```
 
 The agent will:

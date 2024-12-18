@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "typing-agent"
+version = "0.1.0"
+description = ""
+authors = ["MilkClouds <milkclouds00@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pillow = "^11.0.0"
+openai = "^1.58.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
