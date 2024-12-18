@@ -1,5 +1,9 @@
 # ZType Game Agent with Vision Language Model
 
+https://github.com/open-world-agents/desktop-env/raw/refs/heads/main/examples/typing_agent/assets/owa-ztype-demo.mp4
+
+(4x speed video, works smoothly even with long sequences spanning multiple minutes)
+
 An AI agent that plays [ZType](https://zty.pe/) - a typing game where you shoot down enemies by typing words. The agent uses [InternVL2.5-1B](https://huggingface.co/OpenGVLab/InternVL2_5-1B) Vision Language Model to detect words and simulates keyboard inputs to play the game.
 
 ## Key Features
