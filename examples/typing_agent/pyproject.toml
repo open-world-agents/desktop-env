@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.11"
 pillow = "^11.0.0"
 openai = "^1.58.1"
+requests = "^2.32.3"
 
 
 [build-system]

@@ -6,6 +6,7 @@ import time
 from queue import Empty, Full, Queue
 
 import cv2
+import requests
 from loguru import logger
 from openai import OpenAI
 from PIL import Image
@@ -42,6 +43,16 @@ def on_frame_arrived(frame: FrameStamped):
         if frame_queue.full():
             frame_queue.get()  # Remove the oldest frame if queue is full
         frame_queue.put(frame)  # Add the new frame to the queue
+
+
+# Health check to http://localhost:23333/health, set timeout to 3 seconds
+try:
+    response = requests.get("http://localhost:23333/health", timeout=3)
+    response.raise_for_status()
+except requests.exceptions.RequestException as e:
+    logger.error(f"Error connecting to Vision API: {e}")
+    logger.error("Ensure the Vision API is running and accessible at http://localhost:23333")
+    exit(1)
 
 
 class ZTypeAgent(AbstractThread):
