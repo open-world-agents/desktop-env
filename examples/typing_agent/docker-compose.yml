@@ -1,0 +1,23 @@
+version: "3.5"
+
+services:
+  lmdeploy:
+    container_name: lmdeploy
+    image: internvl-custom:latest
+    ports:
+      - "23333:23333"
+    environment:
+      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    stdin_open: true
+    tty: true
+    ipc: host
+    command: lmdeploy serve api_server OpenGVLab/InternVL2_5-1B
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: "all"
+              capabilities: [gpu]
