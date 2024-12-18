@@ -37,6 +37,11 @@ Except `desktop-env`, the time is measure by `python3 -m pyscreenshot.check.spee
 | `MSS`         | 37 ms                  | 6.5×                            |
 | `PyQt5`       | 137 ms                 | 24×                             |
 
+## Demo
+
+https://github.com/user-attachments/assets/4aee4580-179d-4e57-b876-0dd5256bb9c5
+
+For more detail with self-contained running source code, see [examples/typing_agent](https://github.com/open-world-agents/desktop-env/tree/main/examples/typing_agent)
 
 ## Example usage
 
