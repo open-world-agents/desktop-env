@@ -51,6 +51,8 @@ t. ! queue ! videoconvert ! x264enc ! mp4mux fragment-duration=2000 ! filesink l
 mfh264enc
 - rcmode: default 2(uvbr: Unconstrained variable bitrate)
 
+leaky=downstream: Drop the frame if the buffer is full. since appsink is not guaranteed to consume the frame fastly enough, it is necessary.
+
 # Results
 
 1. vague charecter or not?
