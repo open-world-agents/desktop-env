@@ -41,9 +41,9 @@ In the realm of open-source agent research, three critical components are often 
 
 `desktop-env` outperforms other screen capture libraries:
 
-| Library         | Avg. Time per Frame | Relative Speed    |
-|-----------------|---------------------|-------------------|
-| **desktop-env** | **5.7 ms**          | **1× (Fastest)**  |
+| Library         | Avg. Time per Frame | Relative Speed     |
+|-----------------|---------------------|--------------------|
+| **desktop-env** | **5.7 ms**          | **⚡1× (Fastest)**|
 | `pyscreenshot`  | 33 ms               | 🚶‍♂️ 5.8× slower    |
 | `PIL`           | 34 ms               | 🚶‍♂️ 6.0× slower    |
 | `MSS`           | 37 ms               | 🚶‍♂️ 6.5× slower    |
