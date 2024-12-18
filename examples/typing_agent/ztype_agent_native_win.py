@@ -10,12 +10,17 @@ from lmdeploy import TurbomindEngineConfig, pipeline
 from lmdeploy.vl import load_image
 from loguru import logger
 from PIL import Image
+from tqdm import tqdm
 
 from desktop_env import Desktop, DesktopArgs
 from desktop_env.msg import FrameStamped
 from desktop_env.threading import AbstractThread
 from desktop_env.utils import char_to_vk, when_active
 from desktop_env.windows_capture import construct_pipeline
+
+# how to use loguru with tqdm: https://github.com/Delgan/loguru/issues/135
+logger.remove()
+logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
 
 DEBUG = True
 ZTYPE_WINDOW_NAME = "ZType – Typing Game"  # ZType – Typing Game - Type to Shoot - Chrome
@@ -26,7 +31,7 @@ word_queue = Queue()
 
 class ZTypeAgent(AbstractThread):
     """Agent that uses VLM to detect words from game screen captures."""
-    
+
     def __init__(self):
         # Initialize VLM model
         self.model = "OpenGVLab/InternVL2_5-1B"
@@ -106,7 +111,7 @@ IMPORTANT: Don't add any additional explanation - just respond with the word pos
 
 class ZtypeActor(AbstractThread):
     """Actor that types detected words using virtual keyboard inputs."""
-    
+
     def __init__(self, desktop: Desktop):
         self.stop_event = threading.Event()
         self.desktop = desktop
