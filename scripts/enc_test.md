@@ -69,7 +69,7 @@ ONLY in mediafoundation(mf) small setting, charecter is vague. I guess it is bec
 - nvenc, small
     - 547kbps, 41.50fps
     - cpu 0.35
-    - no problem
+    - color is subtly different. gray color -> black.
 - x264, small
     - 256kbps, 42.92fps
     - cpu 0.85
@@ -84,6 +84,12 @@ in mf, nvenv, x264, GPU util have no problem. in x264, cpu usage is too high.
 - x264, FHD
     - cpu 5.0
 
-# Conclusion
+# Troubleshooting
 
-Adopt `nvenc`
+1. why is resolution vague in mf?
+    - mfh264enc supports only even width/height, which is not mentioned in web docs. (only view-able in `gst-inspect-1.0`)
+    - `d3d11scale` and `videoscale` which inputs odd size and reduce (1, 1) in (width, height) make resolution vague.
+    - if you adjust width/height to even value by cropping to avoid videoscale, vague resolution issue is gone.
+2. why is color subtly different in nv?
+    - if you use `NV12` instead of `BGRA`, issue gone.
+    - why???
