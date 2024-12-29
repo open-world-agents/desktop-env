@@ -6,7 +6,7 @@ from .control_publisher import ControlPublisher
 from .desktop_args import DesktopArgs
 from .threading import AbstractThread
 from .window_publisher import WindowPublisher
-from .windows_capture import WindowsCapture
+from .platform_specific import PlatformCapture
 
 
 class Desktop(AbstractThread, ActorMixin):
@@ -16,8 +16,8 @@ class Desktop(AbstractThread, ActorMixin):
         # Create threads
         self.threads = []
 
-        windows_capture = WindowsCapture.from_args(args.windows_capture_args)
-        self.threads.append(windows_capture)
+        platform_capture = PlatformCapture.from_args(args.windows_capture_args)
+        self.threads.append(platform_capture)
 
         window_publisher = WindowPublisher.from_args(args.window_publisher_args)
         self.threads.append(window_publisher)

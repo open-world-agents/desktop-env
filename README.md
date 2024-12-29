@@ -36,7 +36,12 @@ In the realm of open-source agent research, three critical components are often 
 - ⌨️🖱️ **Keyboard/Mouse**: Capture and input keyboard and mouse events.
 - 🪟 **Window**: Get active window's name, bounding box, and handle (`hWnd`).
 
-🚨 **Note**: Currently, `desktop-env` supports **Windows** OS. Since the main goal is to provide an efficiently optimized environment capable of running even real-time games, support for other operating systems will be added gradually.
+🚨 **Note**: `desktop-env` supports **Windows** and **macOS**. Each platform uses its native APIs for optimal performance:
+
+- **Windows**: Uses DXGI/WGC APIs and GStreamer for screen capture
+- **macOS**: Uses Quartz Display Services, Quartz Event Services, and Accessibility APIs
+
+Since the main goal is to provide an efficiently optimized environment capable of running even real-time games, support for Linux will be added gradually.
 
 ---
 
@@ -119,7 +124,7 @@ if __name__ == "__main__":
 
 **Prerequisites**: Install `poetry` first. See the [Poetry Installation Guide](https://python-poetry.org/docs/).
 
-Install `desktop-env` with the following commands:
+### Windows Installation
 
 ```bash
 conda install -c conda-forge pygobject -y
@@ -160,7 +165,7 @@ Plugin Details:
   Documentation            https://gstreamer.freedesktop.org/documentation/d3d11/
   Source release date      2024-07-29
   Binary package           GStreamer Bad Plug-ins source release
-  Origin URL               Unknown package origin
+  Origin URL              Unknown package origin
 
   d3d11colorconvert: Direct3D11 Colorspace Converter
   d3d11compositor: Direct3D11 Compositor
@@ -169,6 +174,24 @@ Plugin Details:
   ...
 ```
 
+### macOS Installation
+
+On macOS, you'll need to install the required dependencies:
+
+```bash
+# Install poetry if not already installed
+curl -sSL https://install.python-poetry.org | python3 -
+
+# Install the package
+poetry install
+
+# Grant screen recording permission
+# You'll need to manually enable screen recording permission for your terminal/IDE
+# in System Preferences > Security & Privacy > Privacy > Screen Recording
+```
+
+🚨 **Note**: On macOS, you'll need to grant screen recording and accessibility permissions to your terminal/IDE for the screen capture and keyboard/mouse control features to work. These permissions can be managed in System Preferences > Security & Privacy > Privacy.
+
 ---
 
 ## 📝 TODOs
@@ -176,7 +199,8 @@ Plugin Details:
 - [ ] 🖥️ Validate overall modality matching in multi-monitor setting
 - [ ] 🌐 Implement remote desktop control demo that wraps up Desktop and exposes network interface through UDP/TCP, HTTP/WebSocket, etc.
 - [ ] 🎥 Support various video formats besides raw RGBA (JPEG, H.264, ...)
-- [ ] 🐧🍎 Add multi-OS support (Linux & macOS)
+- [x] 🍎 Add macOS support
+- [ ] 🐧 Add Linux support
 - [ ] 💬 Implement language interfaces to support desktop agents written in various languages
 
 ---
