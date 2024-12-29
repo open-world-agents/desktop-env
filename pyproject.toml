@@ -16,6 +16,7 @@ pydantic = "^2.10.1"
 orjson = "^3.10.12"
 pydantic-settings = "^2.6.1"
 pyyaml = "^6.0.2"
+PyGObject = {version = "^3.46.0", platform = "darwin"}  # Required for GStreamer on macOS
 
 
 [build-system]
