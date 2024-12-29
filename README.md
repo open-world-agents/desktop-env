@@ -125,22 +125,22 @@ if __name__ == "__main__":
 ### Windows Installation
 
 ```bash
-# Install GStreamer and dependencies
+# 1. Install GStreamer and dependencies via conda
 conda install -c conda-forge pygobject -y
 conda install -c conda-forge gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly -y
 
-# Install desktop-env
+# 2. Install desktop-env
 poetry install
 ```
 
 ### macOS Installation
 
 ```bash
-# Install GStreamer and dependencies
+# 1. Install GStreamer and dependencies via brew
 brew install gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly pkg-config gobject-introspection
 
-# Install desktop-env
-poetry install
+# 2. Install desktop-env with macOS dependencies
+poetry install --with macos
 ```
 
 🚨 **Notes**: 

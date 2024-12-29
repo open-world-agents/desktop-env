@@ -11,12 +11,31 @@ opencv-python-headless = "^4.10.0.84"
 pynput = "^1.7.7"
 tqdm = "^4.67.1"
 loguru = "^0.7.2"
-pygetwindow = "^0.0.9"
 pydantic = "^2.10.1"
 orjson = "^3.10.12"
 pydantic-settings = "^2.6.1"
 pyyaml = "^6.0.2"
-PyGObject = {version = "^3.46.0", platform = "darwin"}  # Required for GStreamer on macOS
+
+# Windows-specific dependencies
+pygetwindow = {version = "^0.0.9", platform = "win32"}
+
+# macOS-specific dependencies
+pyobjc-framework-Quartz = {version = "^10.1", platform = "darwin"}  # For window management on macOS
+pyobjc-framework-ApplicationServices = {version = "^10.1", platform = "darwin"}  # For UI automation on macOS
+
+[tool.poetry.group.windows]
+optional = true
+
+[tool.poetry.group.windows.dependencies]
+# These are installed via conda on Windows, listed here for reference
+# pygobject = "^3.46.0"
+# gstreamer = "^1.24.6"
+
+[tool.poetry.group.macos]
+optional = true
+
+[tool.poetry.group.macos.dependencies]
+PyGObject = "^3.46.0"
 
 
 [build-system]
