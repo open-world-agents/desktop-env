@@ -16,8 +16,7 @@ In the realm of open-source agent research, three critical components are often 
 
 - 🖥️ **Open-Source Environment**: Provides a rich, desktop-based environment identical to what humans use daily.
 - 📈 **Data Recorder**: Includes a built-in [recorder](examples/recorder/) to capture and utilize real human desktop interactions.
-- 🤝 **Future Research Collaboration**: Plans are underway to foster open-source research in *a new repository*.
-
+- 🤝 **Future Research Collaboration**: Plans are underway to foster open-source research in _a new repository_.
 
 **Any kind of open-source contributions are always welcome.**
 
@@ -37,6 +36,7 @@ In the realm of open-source agent research, three critical components are often 
 - 🪟 **Window**: Get active window's name, bounding box, and handle (`hWnd`).
 
 ✨ **Supported Operating Systems**:
+
 - **Windows**: Full support with optimized performance using Direct3D11
 - **macOS**: Full support using AVFoundation for screen capture
 - **Linux**: Basic support (work in progress)
@@ -48,14 +48,14 @@ In the realm of open-source agent research, three critical components are often 
 `desktop-env` outperforms other screen capture libraries:
 
 | Library         | Avg. Time per Frame | Relative Speed     |
-|-----------------|---------------------|--------------------|
-| **desktop-env** | **5.7 ms**          | **⚡1× (Fastest)**|
-| `pyscreenshot`  | 33 ms               | 🚶‍♂️ 5.8× slower    |
-| `PIL`           | 34 ms               | 🚶‍♂️ 6.0× slower    |
-| `MSS`           | 37 ms               | 🚶‍♂️ 6.5× slower    |
+| --------------- | ------------------- | ------------------ |
+| **desktop-env** | **5.7 ms**          | **⚡1× (Fastest)** |
+| `pyscreenshot`  | 33 ms               | 🚶‍♂️ 5.8× slower     |
+| `PIL`           | 34 ms               | 🚶‍♂️ 6.0× slower     |
+| `MSS`           | 37 ms               | 🚶‍♂️ 6.5× slower     |
 | `PyQt5`         | 137 ms              | 🐢 24× slower      |
 
-*Measured on i5-11400, GTX 1650.* Not only is FPS measured, but CPU/GPU resource usage is also **significantly lower**.
+_Measured on i5-11400, GTX 1650._ Not only is FPS measured, but CPU/GPU resource usage is also **significantly lower**.
 
 ---
 
@@ -130,7 +130,7 @@ conda install -c conda-forge pygobject -y
 conda install -c conda-forge gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly -y
 
 # 2. Install desktop-env
-poetry install
+poetry install --with windows
 ```
 
 ### macOS Installation
@@ -143,12 +143,16 @@ brew install gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plu
 poetry install --with macos
 ```
 
-🚨 **Notes**: 
+🚨 **Notes**:
+
 1. Installing `pygobject` with `pip` on Windows causes the error:
+
 ```
 ..\meson.build:31:9: ERROR: Dependency 'gobject-introspection-1.0' is required but not found.
 ```
+
 2. On macOS, if you encounter permission issues with `brew`, you might need to fix permissions:
+
 ```bash
 sudo chown -R $(whoami) $(brew --prefix)/*
 ```
@@ -158,6 +162,7 @@ sudo chown -R $(whoami) $(brew --prefix)/*
 After installation, verify it with the following commands:
 
 #### Windows
+
 ```bash
 # Check GStreamer version (should be >= 1.24.6)
 $ conda list gst-*
@@ -175,6 +180,7 @@ $ gst-inspect-1.0.exe d3d11
 ```
 
 #### macOS
+
 ```bash
 # Check GStreamer version
 $ gst-inspect-1.0 --version
