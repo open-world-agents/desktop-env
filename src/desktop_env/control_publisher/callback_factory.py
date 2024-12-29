@@ -15,7 +15,7 @@ class KeyboardListenerFactory:
 
     def on_press(self, key):
         vk = key_to_vk(key)
-        logger.debug(f"Key {key}({vk}) pressed")  # enum Key / pynput.keyboara._win32.KeyCode
+        logger.debug(f"Key {key}({vk}) pressed")
         # logger.debug(
         #     f"{getattr(key, 'vk', None)} {getattr(key, 'char', None)} {getattr(key, 'name', None)} {getattr(key, 'value', None)}"
         # )
