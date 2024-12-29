@@ -36,7 +36,13 @@ class Desktop(AbstractThread, ActorMixin):
 
     def start_free_threaded(self):
         for thread in self.threads:
-            thread.start_free_threaded()
+            try:
+                thread.start_free_threaded()
+            except Exception as e:
+                # Catch error and gracefully shutdown
+                print(f"Error starting thread {thread}: {e}")
+                self.stop_join_close()
+                exit(1)
 
     def stop(self):
         for thread in self.threads:
