@@ -30,7 +30,7 @@ class KeyboardController:
 
     def press(self, key: int) -> None:
         if platform.system() == "Darwin":
-            # Mac OS에서는 특수 키를 다르게 처리
+            # Special key handling for Mac OS
             special_keys = {
                 58: pynput.keyboard.Key.alt,      # Option
                 55: pynput.keyboard.Key.cmd,      # Command
