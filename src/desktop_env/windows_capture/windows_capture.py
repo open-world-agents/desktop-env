@@ -129,14 +129,13 @@ class WindowsCapture(AbstractThread):
             try:
                 frame_data: bytes = mapinfo.data  # This is the JPEG image data
                 frame_arr = np.frombuffer(frame_data, dtype=np.uint8).reshape((height, width, 4))
+                message = FrameStamped(frame_arr=frame_arr, timestamp_ns=time.time_ns())
+                self._bandwidth += len(frame_data)
+
+                # Publish the message data
+                callback(message)
             finally:
                 buf.unmap(mapinfo)
-
-            message = FrameStamped(frame_arr=frame_arr, timestamp_ns=time.time_ns())
-            self._bandwidth += len(frame_data)
-
-            # Publish the message data
-            callback(message)
 
             # Update the tqdm progress bar
             self.pbar.update(1)
