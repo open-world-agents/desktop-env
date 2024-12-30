@@ -1,3 +1,10 @@
+"""
+Extracting timestamp with probe.
+
+Issues:
+- Since probe is blocking, if probe function takes too long, the pipeline will be blocked.
+"""
+
 import gi
 
 gi.require_version("Gst", "1.0")
@@ -41,24 +48,24 @@ def main():
     # Create the pipeline with named elements
     pipeline_str = (
         "d3d11screencapturesrc show-cursor=True name=src do-timestamp=True ! "
-        "videorate name=videorate ! video/x-raw,framerate=30/1 ! "
-        "videoconvert ! x264enc ! "
+        "videorate ! video/x-raw,framerate=10/1 ! "
+        "videoconvert ! x264enc speed-preset=1 ! "
         "mp4mux fragment-duration=2000 ! "
         "filesink location=output.mp4"
     )
 
     pipeline = Gst.parse_launch(pipeline_str)
 
-    # Get the videorate element by name
-    videorate = pipeline.get_by_name("videorate")
-    if not videorate:
-        print("Could not get videorate element")
+    # Get the videoconvert element by name
+    videoconvert = pipeline.get_by_name("videoconvert0")
+    if not videoconvert:
+        print("Could not get videoconvert element")
         return
 
-    # Get the src pad of the videorate element
-    src_pad = videorate.get_static_pad("src")
+    # Get the src pad of the videoconvert element
+    src_pad = videoconvert.get_static_pad("src")
     if not src_pad:
-        print("Could not get src pad of videorate")
+        print("Could not get src pad of videoconvert")
         return
 
     # Add the pad probe to intercept buffers
