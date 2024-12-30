@@ -122,7 +122,9 @@ if __name__ == "__main__":
 Install `desktop-env` with the following commands:
 
 ```bash
-conda install -c conda-forge pygobject -y
+conda install -c conda-forge pygobject gst-python -y
+# pygobject: PyGObject is a Python package which provides bindings for GObject based libraries such as GTK+, GStreamer, WebKitGTK+, GLib, GIO and many more.
+# gst-python: `python` plugin, loader for plugins written in python
 conda install -c conda-forge gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly -y
 
 poetry install
@@ -167,6 +169,12 @@ Plugin Details:
   ...
   d3d11screencapturesrc: Direct3D11 Screen Capture Source
   ...
+```
+
+Install custom plugin, by configuring environment variable.
+```
+$env:GST_PLUGIN_PATH = (Join-Path -Path $pwd -ChildPath "custom_plugin")
+echo $env:GST_PLUGIN_PATH
 ```
 
 ---
