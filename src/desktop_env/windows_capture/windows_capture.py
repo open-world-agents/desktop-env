@@ -33,7 +33,7 @@ class WindowsCapture(AbstractThread):
 
         if pipeline_description is None:
             pipeline_description = construct_pipeline()
-        self.pipeline = Gst.parse_launch(pipeline_description)
+        self.pipeline: Gst.Pipeline = Gst.parse_launch(pipeline_description)
 
         # Get the appsink element and set properties
         self.appsink = self.pipeline.get_by_name("appsink")
@@ -52,18 +52,20 @@ class WindowsCapture(AbstractThread):
 
     def start(self):
         """Start the pipeline. This function will block the current thread."""
-        self.pipeline.set_state(Gst.State.PLAYING)
+        ret = self.pipeline.set_state(Gst.State.PLAYING)
+        if ret == Gst.StateChangeReturn.FAILURE:
+            bus = self.pipeline.get_bus()
+            msg = bus.timed_pop_filtered(Gst.CLOCK_TIME_NONE, Gst.MessageType.ERROR)
+            err, debug = msg.parse_error()
+            print(f"Failed to set pipeline to PLAYING state, got {ret}")
+            print(f"Error: {err}, Debug: {debug}")
+            return
         self.loop.run()
 
     def start_free_threaded(self):
         """Start the pipeline in a separate thread. This function will not block the current thread."""
 
-        def start_main_loop(loop):
-            """Function to run the GLib MainLoop in a separate thread."""
-            loop.run()
-
-        self.pipeline.set_state(Gst.State.PLAYING)
-        self._loop_thread = threading.Thread(target=start_main_loop, args=(self.loop,))
+        self._loop_thread = threading.Thread(target=self.start)
         self._loop_thread.start()
 
     # TODO: verify whether stop-join-close lifecycle is correct
@@ -89,6 +91,30 @@ class WindowsCapture(AbstractThread):
         if hasattr(self, "_loop_thread"):
             self._loop_thread.join()
         self.pbar.close()
+
+    def __get_frame_time_utc(self, pts):
+        assert pts != Gst.CLOCK_TIME_NONE
+
+        # Get the pipeline's clock. Ref: https://gstreamer.freedesktop.org/documentation/gstreamer/gstelement.html?gi-language=python
+        clock = self.pipeline.get_clock()
+        assert clock.props.clock_type == Gst.ClockType.MONOTONIC
+        elapsed_time_from_playing = clock.get_time() - self.pipeline.get_base_time()
+        latency = elapsed_time_from_playing - pts
+
+        # TODO: report latency step-by-step, separating the gstreamer's latency and others
+        # Print the latency in milliseconds
+        # print(f"Latency: {latency / Gst.MSECOND:.2f} ms")
+
+        # frame_time_in_monotonic = pts + self.pipeline.get_base_time()
+        # frame_time_in_utc = frame_time_in_monotonic + (time.time_ns() - time.monotonic_ns())
+        frame_time_in_utc = time.time_ns() - latency
+
+        # Convert nanoseconds to seconds and get UTC time
+        import datetime
+
+        utc_time = datetime.datetime.fromtimestamp(frame_time_in_utc / Gst.SECOND)
+
+        return frame_time_in_utc
 
     def __on_new_sample(self, sink, callback: Callable):
         """Callback function for the new-sample signal of appsink. Internally calls `self.screen_callback(frame_stamped)`"""
@@ -129,7 +155,7 @@ class WindowsCapture(AbstractThread):
             try:
                 frame_data: bytes = mapinfo.data  # This is the JPEG image data
                 frame_arr = np.frombuffer(frame_data, dtype=np.uint8).reshape((height, width, 4))
-                message = FrameStamped(frame_arr=frame_arr, timestamp_ns=time.time_ns())
+                message = FrameStamped(frame_arr=frame_arr, timestamp_ns=self.__get_frame_time_utc(buf.pts))
                 self._bandwidth += len(frame_data)
 
                 # Publish the message data

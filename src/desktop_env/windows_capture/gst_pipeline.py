@@ -16,11 +16,13 @@ def output_format_to_element(output_format: Literal["raw", "jpeg"]) -> str:
 
 
 def construct_pipeline(
+    *,
     window_name: Optional[str] = None,
     monitor_idx: Optional[int] = None,
     additional_parameter_for_screencap="",
     framerate="30/1",
     output_format: Literal["raw", "jpeg"] = "raw",
+    output_dir: Optional[str] = None,
 ) -> str:
     """Construct a GStreamer pipeline for screen capturing.
     Args:
@@ -48,13 +50,19 @@ def construct_pipeline(
         src_parameter += f" monitor-index={monitor_idx}"
 
     assert isinstance(framerate, str), "framerate must be a string, now. (TODO: support other types)"
+    assert output_format == "raw", "Only raw format is supported now."
 
+    # TODO: prevent odd-size input to mfh264enc, which induces an resize and blur effect.
     pipeline_description = (
         f"{pipeline_src} {src_parameter} {additional_parameter_for_screencap} do-timestamp=True ! "
         "videorate drop-only=True ! " + f"video/x-raw(memory:D3D11Memory),framerate=0/1,max-framerate={framerate} ! "
-        "d3d11download ! " + f"{output_format_to_element(output_format)} ! "
-        "appsink name=appsink max-buffers=1 drop=true"
+        "tee name=t"
+        "t. ! queue leaky=downstream ! d3d11download ! video/x-raw,format=BGRA ! appsink name=appsink max-buffers=1 drop=true "
     )
+    if output_dir is not None:
+        pipeline_description += (
+            f"t. ! queue ! d3d11convert ! mfh264enc ! h264parse ! matroskamux ! filesink location={output_dir}"
+        )
     # max-buffers=1 drop=true: Drop the frame if the buffer is full. it is necessary to prevent memory boom.
 
     assert "appsink" in pipeline_description, "appsink element is not found in the pipeline description."
