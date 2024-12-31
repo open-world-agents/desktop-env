@@ -122,7 +122,8 @@ class UtcTimestampSrc(GstBase.BaseSrc):
         current_time = time.time_ns()
         utc_time = datetime.datetime.fromtimestamp(current_time / 1e9).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         # Set buffer PTS
-        buf.pts = self.get_clock().get_time() - self.get_base_time()
+        pts_time = self.get_clock().get_time() - self.get_base_time()
+        buf.pts = pts_time
 
         logger.trace(
             (
@@ -133,8 +134,8 @@ class UtcTimestampSrc(GstBase.BaseSrc):
         )
 
         # Format start and end times in SRT format
-        start_time_sec = buf.pts / Gst.SECOND
-        end_time_sec = (buf.pts + buf.duration) / Gst.SECOND
+        start_time_sec = pts_time / Gst.SECOND
+        end_time_sec = (pts_time + buf.duration) / Gst.SECOND
 
         start_time = self._format_time(start_time_sec)
         end_time = self._format_time(end_time_sec)
