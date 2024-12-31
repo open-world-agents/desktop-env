@@ -63,7 +63,7 @@ class UtcTimestampSrc(GstBase.BaseSrc):
         self.interval = DEFAULT_INTERVAL
         self.set_live(True)
         self.set_format(Gst.Format.TIME)
-        self.next_time = 0
+        self.past_time = None
         self.subtitle_number = 1
 
     def do_get_property(self, prop):
@@ -79,61 +79,58 @@ class UtcTimestampSrc(GstBase.BaseSrc):
             raise AttributeError("Unknown property %s" % prop.name)
 
     def do_start(self):
-        self.next_time = 0
+        self.past_time = None
         self.subtitle_number = 1
         return True
 
-    def do_get_times(self, buf):
-        if self.is_live:
-            ts = buf.pts
-            if ts != Gst.CLOCK_TIME_NONE:
-                duration = buf.duration
-                if duration != Gst.CLOCK_TIME_NONE:
-                    end = ts + duration
-                else:
-                    end = Gst.CLOCK_TIME_NONE
-                start = ts
-            else:
-                start = Gst.CLOCK_TIME_NONE
-                end = Gst.CLOCK_TIME_NONE
-        else:
-            start = Gst.CLOCK_TIME_NONE
-            end = Gst.CLOCK_TIME_NONE
+    # deprecated
+    def wait_next(self, buf):
+        clock = self.get_clock()
+        if not clock:
+            Gst.error("Clock is not available.")
+            return Gst.FlowReturn.ERROR
 
-        # start += Gst.SECOND * 5
-        logger.trace(f"start: {start/Gst.SECOND}, end: {end/Gst.SECOND}")
-        return start, end
+        if self.next_time is None:
+            self.next_time = clock.get_time() - self.get_base_time() + buf.duration
+
+        abs_time = self.next_time + self.get_base_time()
+        clock_id = clock.new_single_shot_id(abs_time)
+        # https://gstreamer.freedesktop.org/documentation/gstreamer/gstclock.html?gi-language=python#gst_clock_id_wait
+        ret, jitter = clock.id_wait(clock_id)
+
+        if ret == Gst.ClockReturn.UNSCHEDULED:
+            clock.id_unref(clock_id)
+            return Gst.FlowReturn.FLUSHING
+        elif ret != Gst.ClockReturn.OK:
+            clock.id_unref(clock_id)
+            Gst.error("Clock wait error: %s" % ret)
+            return Gst.FlowReturn.ERROR
+
+        clock.id_unref(clock_id)
 
     def do_fill(self, offset, length, buf):
-        # Get the current UTC time in nanoseconds
-        current_time = time.time_ns()
-        utc_time = datetime.datetime.fromtimestamp(current_time / 1e9).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        if self.past_time is None:
+            self.past_time = time.time_ns()
+
+        to_sleep = max(0, self.interval - (time.time_ns() - self.past_time) / 1e9)
+        time.sleep(to_sleep)
+        self.past_time = self.past_time + self.interval * 1e9
 
         # Set buffer duration
         buf.duration = self.interval * Gst.SECOND
+        # Get the current UTC time in nanoseconds
+        current_time = time.time_ns()
+        utc_time = datetime.datetime.fromtimestamp(current_time / 1e9).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        # Set buffer PTS
+        buf.pts = self.get_clock().get_time() - self.get_base_time()
 
-        if self.get_property("do-timestamp"):
-            raise NotImplementedError("do-timestamp is not implemented yet.")
-            # Get the current running time from the clock
-            clock = self.get_clock()
-            logger.trace((clock.get_time() - self.get_base_time()) / Gst.SECOND)
-            if clock:
-                now = clock.get_time() - self.get_base_time()
-                buf.pts = now
-                # buf.pts = self.next_time
-                logger.trace(f"next_time: {self.next_time / Gst.SECOND}, now: {now / Gst.SECOND}")
-                # Update next_time for subtitle numbering purposes
-                self.next_time = buf.pts + buf.duration
-            else:
-                # Fallback if clock is unavailable
-                buf.pts = self.next_time
-                self.next_time += buf.duration
-        else:
-            # Use internal timing
-            buf.pts = self.next_time
-            self.next_time += buf.duration
-
-        logger.trace((self.next_time / Gst.SECOND, buf.pts / Gst.SECOND, buf.duration / Gst.SECOND))
+        logger.trace(
+            (
+                (self.get_clock().get_time() - self.get_base_time()) / Gst.SECOND,
+                buf.pts / Gst.SECOND,
+                buf.duration / Gst.SECOND,
+            )
+        )
 
         # Format start and end times in SRT format
         start_time_sec = buf.pts / Gst.SECOND
@@ -143,7 +140,7 @@ class UtcTimestampSrc(GstBase.BaseSrc):
         end_time = self._format_time(end_time_sec)
 
         # Construct SRT subtitle entry
-        data = (f"{self.subtitle_number}\n{start_time} --> {end_time}\n{utc_time}\n\n").encode("utf-8")
+        data = (f"{self.subtitle_number}\n{start_time} --> {end_time}\n{current_time}\n\n").encode("utf-8")
         # data = (
         #     f"{self.subtitle_number}\n{start_time} --> {end_time}\n".encode("utf-8")
         #     + struct.pack(">Q", current_time)
@@ -163,8 +160,7 @@ class UtcTimestampSrc(GstBase.BaseSrc):
 
         # Increment the subtitle number
         self.subtitle_number += 1
-
-        return Gst.FlowReturn.OK
+        return (Gst.FlowReturn.OK, buf)
 
     def _format_time(self, total_seconds):
         hours = int(total_seconds // 3600)
