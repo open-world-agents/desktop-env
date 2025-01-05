@@ -1,3 +1,6 @@
+import platform
+from typing import Union
+
 import numpy as np
 from pynput.keyboard import Key, KeyCode
 
@@ -5,22 +8,63 @@ from ..window_publisher.utils import get_window_by_title, when_active
 
 
 def frame_byte_to_np(frame: bytes, *, width: int = 1920, height: int = 1080):
-    """Converts video/x-raw,format=BGRA into numpy array."""
+    """Converts video/x-raw,format=BGRA into a numpy array."""
     # Extract width and height from the frame data
     frame = np.frombuffer(frame, dtype=np.uint8).reshape((height, width, 4))
     return frame
 
 
-def key_to_vk(key: Key | KeyCode | None) -> int:
-    """Converts a key to a virtual key code.
+def key_to_vk(key: Union[Key, KeyCode, None]) -> int:
+    """Converts a pynput key to a virtual key code.
 
-    The key parameter passed to callbacks is a pynput.keyboard.Key, for special keys, a pynput.keyboard.KeyCode for normal alphanumeric keys, or just None for unknown keys.
-    Ref: https://pynput.readthedocs.io/en/latest/keyboard.html#monitoring-the-keyboard
+    The key parameter passed to callbacks is a `pynput.keyboard.Key` for special keys,
+    a `pynput.keyboard.KeyCode` for normal alphanumeric keys, or just None for unknown keys.
+
+    This function handles different operating systems accordingly.
     """
-    vk = getattr(key, "vk", None)  # Key, special keys
-    if vk is None:
-        vk = getattr(key, "value", None).vk  # KeyCode, alphanumeric keys
-    return vk
+    if key is None:
+        return 0
+
+    os_name = platform.system()
+
+    if os_name == "Windows":
+        # Windows uses virtual key codes
+        vk = getattr(key, "vk", None)  # Key, special keys
+        if vk is None:
+            vk = getattr(key, "value", None).vk  # KeyCode, alphanumeric keys
+        return vk
+    elif os_name == "Darwin":
+        # Mac OS uses key codes
+        if isinstance(key, Key):
+            # Map common special keys
+            mac_key_map = {
+                Key.alt: 58,  # Option key
+                Key.alt_l: 58,  # Left Option
+                Key.alt_r: 61,  # Right Option
+                Key.cmd: 55,  # Command key
+                Key.cmd_l: 55,  # Left Command
+                Key.cmd_r: 54,  # Right Command
+                Key.ctrl: 59,  # Control key
+                Key.ctrl_l: 59,  # Left Control
+                Key.ctrl_r: 62,  # Right Control
+                Key.shift: 56,  # Shift key
+                Key.shift_l: 56,  # Left Shift
+                Key.shift_r: 60,  # Right Shift
+                Key.enter: 36,  # Return
+                Key.space: 49,  # Space
+                Key.backspace: 51,  # Delete
+                Key.delete: 117,  # Forward Delete
+                Key.tab: 48,  # Tab
+                Key.esc: 53,  # Escape
+            }
+            return mac_key_map.get(key, 0)
+        # For regular keys, use the ASCII value
+        return ord(key.char.lower()) if hasattr(key, "char") else 0
+    else:
+        # For other OS, fallback to ASCII values
+        if isinstance(key, Key):
+            return key.value.vk if hasattr(key.value, "vk") else 0
+        return ord(key.char.lower()) if hasattr(key, "char") else 0
 
 
 def char_to_vk(char: str) -> int:
