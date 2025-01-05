@@ -16,8 +16,7 @@ In the realm of open-source agent research, three critical components are often 
 
 - 🖥️ **Open-Source Environment**: Provides a rich, desktop-based environment identical to what humans use daily.
 - 📈 **Data Recorder**: Includes a built-in [recorder](examples/recorder/) to capture and utilize real human desktop interactions.
-- 🤝 **Future Research Collaboration**: Plans are underway to foster open-source research in *a new repository*.
-
+- 🤝 **Future Research Collaboration**: Plans are underway to foster open-source research in _a new repository_.
 
 **Any kind of open-source contributions are always welcome.**
 
@@ -36,7 +35,11 @@ In the realm of open-source agent research, three critical components are often 
 - ⌨️🖱️ **Keyboard/Mouse**: Capture and input keyboard and mouse events.
 - 🪟 **Window**: Get active window's name, bounding box, and handle (`hWnd`).
 
-🚨 **Note**: Currently, `desktop-env` supports **Windows** OS. Since the main goal is to provide an efficiently optimized environment capable of running even real-time games, support for other operating systems will be added gradually.
+✨ **Supported Operating Systems**:
+
+- **Windows**: Full support with optimized performance using Direct3D11
+- **macOS**: Full support using AVFoundation for screen capture
+- **Linux**: Basic support (work in progress)
 
 ---
 
@@ -45,14 +48,14 @@ In the realm of open-source agent research, three critical components are often 
 `desktop-env` outperforms other screen capture libraries:
 
 | Library         | Avg. Time per Frame | Relative Speed     |
-|-----------------|---------------------|--------------------|
-| **desktop-env** | **5.7 ms**          | **⚡1× (Fastest)**|
-| `pyscreenshot`  | 33 ms               | 🚶‍♂️ 5.8× slower    |
-| `PIL`           | 34 ms               | 🚶‍♂️ 6.0× slower    |
-| `MSS`           | 37 ms               | 🚶‍♂️ 6.5× slower    |
+| --------------- | ------------------- | ------------------ |
+| **desktop-env** | **5.7 ms**          | **⚡1× (Fastest)** |
+| `pyscreenshot`  | 33 ms               | 🚶‍♂️ 5.8× slower     |
+| `PIL`           | 34 ms               | 🚶‍♂️ 6.0× slower     |
+| `MSS`           | 37 ms               | 🚶‍♂️ 6.5× slower     |
 | `PyQt5`         | 137 ms              | 🐢 24× slower      |
 
-*Measured on i5-11400, GTX 1650.* Not only is FPS measured, but CPU/GPU resource usage is also **significantly lower**.
+_Measured on i5-11400, GTX 1650._ Not only is FPS measured, but CPU/GPU resource usage is also **significantly lower**.
 
 ---
 
@@ -119,26 +122,49 @@ if __name__ == "__main__":
 
 **Prerequisites**: Install `poetry` first. See the [Poetry Installation Guide](https://python-poetry.org/docs/).
 
-Install `desktop-env` with the following commands:
+### Windows Installation
 
 ```bash
+# 1. Install GStreamer and dependencies via conda
 conda install -c conda-forge pygobject -y
 conda install -c conda-forge gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly -y
 
-poetry install
+# 2. Install desktop-env
+poetry install --with windows
 ```
 
-🚨 **Note**: Installing `pygobject` with `pip` causes the error:
+### macOS Installation
+
+```bash
+# 1. Install GStreamer and dependencies via brew
+brew install gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly pkg-config gobject-introspection
+
+# 2. Install desktop-env with macOS dependencies
+poetry install --with macos
+```
+
+🚨 **Notes**:
+
+1. Installing `pygobject` with `pip` on Windows causes the error:
+
 ```
 ..\meson.build:31:9: ERROR: Dependency 'gobject-introspection-1.0' is required but not found.
 ```
 
-After installation, verify it with the following commands:
-
-- Ensure GStreamer version >= 1.24.6
-- Confirm the Direct3D11 plugin is installed
+2. On macOS, if you encounter permission issues with `brew`, you might need to fix permissions:
 
 ```bash
+sudo chown -R $(whoami) $(brew --prefix)/*
+```
+
+### Verifying Installation
+
+After installation, verify it with the following commands:
+
+#### Windows
+
+```bash
+# Check GStreamer version (should be >= 1.24.6)
 $ conda list gst-*
 # packages in environment at C:\Users\...\miniconda3\envs\agent:
 #
@@ -149,24 +175,27 @@ gst-plugins-good          1.24.6               h3b23867_0    conda-forge
 gst-plugins-ugly          1.24.6               ha7af72c_0    conda-forge
 gstreamer                 1.24.6               h5006eae_0    conda-forge
 
+# Verify Direct3D11 plugin
 $ gst-inspect-1.0.exe d3d11
+```
+
+#### macOS
+
+```bash
+# Check GStreamer version
+$ gst-inspect-1.0 --version
+gst-inspect-1.0 version 1.24.6
+
+# Verify AVFoundation plugin
+$ gst-inspect-1.0 avfvideosrc
 Plugin Details:
-  Name                     d3d11
-  Description              Direct3D11 plugin
-  Filename                 C:\Users\...\miniconda3\envs\agent\Library\lib\gstreamer-1.0\gstd3d11.dll
+  Name                     avfvideosrc
+  Description              AVFoundation video source
+  Filename                 /opt/homebrew/lib/gstreamer-1.0/libgstavfvideosrc.so
   Version                  1.24.6
   License                  LGPL
-  Source module            gst-plugins-bad
-  Documentation            https://gstreamer.freedesktop.org/documentation/d3d11/
-  Source release date      2024-07-29
-  Binary package           GStreamer Bad Plug-ins source release
-  Origin URL               Unknown package origin
-
-  d3d11colorconvert: Direct3D11 Colorspace Converter
-  d3d11compositor: Direct3D11 Compositor
-  ...
-  d3d11screencapturesrc: Direct3D11 Screen Capture Source
-  ...
+  Source module            gst-plugins-good
+  Binary package          GStreamer Good Plug-ins source release
 ```
 
 ---
@@ -176,7 +205,7 @@ Plugin Details:
 - [ ] 🖥️ Validate overall modality matching in multi-monitor setting
 - [ ] 🌐 Implement remote desktop control demo that wraps up Desktop and exposes network interface through UDP/TCP, HTTP/WebSocket, etc.
 - [ ] 🎥 Support various video formats besides raw RGBA (JPEG, H.264, ...)
-- [ ] 🐧🍎 Add multi-OS support (Linux & macOS)
+- [x] 🐧🍎 Add multi-OS support (Linux & macOS)
 - [ ] 💬 Implement language interfaces to support desktop agents written in various languages
 
 ---
