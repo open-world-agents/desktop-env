@@ -81,7 +81,7 @@ if __name__ == "__main__":
         windows_capture_args={
             "on_frame_arrived": on_frame_arrived,
             "pipeline_description": construct_pipeline(
-                window_name=None,  # you may substring of the window name
+                window_name=None,  # you may specify the substring of the window name
                 monitor_idx=None,  # you may specify the monitor index
                 framerate="60/1",
             ),

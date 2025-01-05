@@ -135,6 +135,12 @@ conda install -c conda-forge gstreamer gst-plugins-base gst-plugins-good gst-plu
 poetry install --with windows
 ```
 
+Install custom plugin, by configuring environment variable.
+```
+$env:GST_PLUGIN_PATH = (Join-Path -Path $pwd -ChildPath "custom_plugin")
+echo $env:GST_PLUGIN_PATH
+```
+
 ### macOS Installation
 
 ```bash
@@ -144,6 +150,8 @@ brew install gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plu
 # 2. Install desktop-env with macOS dependencies
 poetry install --with macos
 ```
+
+Install custom plugin, by configuring environment variable as Windows guide.
 
 🚨 **Notes**:
 
@@ -181,12 +189,6 @@ gstreamer                 1.24.6               h5006eae_0    conda-forge
 $ gst-inspect-1.0.exe d3d11
 ```
 
-Install custom plugin, by configuring environment variable.
-```
-$env:GST_PLUGIN_PATH = (Join-Path -Path $pwd -ChildPath "custom_plugin")
-echo $env:GST_PLUGIN_PATH
-```
-
 #### macOS
 
 ```bash
@@ -205,8 +207,6 @@ Plugin Details:
   Source module            gst-plugins-good
   Binary package          GStreamer Good Plug-ins source release
 ```
-
-Install custom plugin, by configuring environment variable as Windows guide.
 
 ---
 
