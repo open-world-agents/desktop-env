@@ -15,7 +15,7 @@ def get_window_by_title(window_title_substring: str) -> WindowInfo:
         rect = window._getWindowRect()
         return WindowInfo(title=window.title, rect=(rect.left, rect.top, rect.right, rect.bottom), hWnd=window._hWnd)
     elif os_name == "Darwin":
-        from Quartz import CGWindowListCopyWindowInfo, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowLayer
+        from Quartz import CGWindowListCopyWindowInfo, kCGNullWindowID, kCGWindowLayer, kCGWindowListOptionOnScreenOnly
 
         windows = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly, kCGNullWindowID)
         for window in windows:
@@ -27,7 +27,6 @@ def get_window_by_title(window_title_substring: str) -> WindowInfo:
             title = window.get("kCGWindowName", "")
             if not title:
                 title = window.get("kCGWindowOwnerName", "")
-            print(f"title: {title}")
 
             if title and window_title_substring.lower() in title.lower():
                 bounds = window.get("kCGWindowBounds")
@@ -46,13 +45,7 @@ def get_window_by_title(window_title_substring: str) -> WindowInfo:
         raise ValueError(f"No window with title containing '{window_title_substring}' found.")
     else:
         # Linux or other OS (not implemented yet)
-        to_send = {
-            "title": window.title,
-            "rect": (window.left, window.top, window.right, window.bottom),
-            "hWnd": 0,
-        }
-
-    return WindowInfo(**to_send)
+        raise NotImplementedError("Not implemented for Linux or other OS.")
 
 
 def when_active(window_title_substring: str):

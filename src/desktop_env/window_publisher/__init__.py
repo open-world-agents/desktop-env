@@ -1,6 +1,6 @@
+import platform
 import threading
 import time
-import platform
 from typing import Callable
 
 from loguru import logger
@@ -22,7 +22,7 @@ class WindowPublisher(AbstractThread):
         self.callback = callback
 
         if platform.system() == "Darwin":
-            from Quartz import CGWindowListCopyWindowInfo, kCGWindowListOptionOnScreenOnly, kCGNullWindowID
+            from Quartz import CGWindowListCopyWindowInfo, kCGNullWindowID, kCGWindowListOptionOnScreenOnly
 
             self._get_window_info = self._get_window_info_macos
         elif platform.system() == "Windows":
@@ -33,8 +33,19 @@ class WindowPublisher(AbstractThread):
         else:
             raise NotImplementedError(f"Platform {platform.system()} is not supported yet")
 
+    def _get_window_info_windows(self):
+        active_window = self.gw.getActiveWindow()
+        if active_window is not None:
+            rect = active_window._getWindowRect()
+            return WindowInfo(
+                title=active_window.title,
+                rect=(rect.left, rect.top, rect.right, rect.bottom),
+                hWnd=active_window._hWnd,
+            )
+        return None
+
     def _get_window_info_macos(self):
-        from Quartz import CGWindowListCopyWindowInfo, kCGWindowListOptionOnScreenOnly, kCGNullWindowID
+        from Quartz import CGWindowListCopyWindowInfo, kCGNullWindowID, kCGWindowListOptionOnScreenOnly
 
         windows = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly, kCGNullWindowID)
         # Get the frontmost window
@@ -51,17 +62,6 @@ class WindowPublisher(AbstractThread):
                     ),
                     hWnd=window.get("kCGWindowNumber", 0),
                 )
-        return None
-
-    def _get_window_info_windows(self):
-        active_window = self.gw.getActiveWindow()
-        if active_window is not None:
-            rect = active_window._getWindowRect()
-            return WindowInfo(
-                title=active_window.title,
-                rect=(rect.left, rect.top, rect.right, rect.bottom),
-                hWnd=active_window._hWnd,
-            )
         return None
 
     @classmethod
