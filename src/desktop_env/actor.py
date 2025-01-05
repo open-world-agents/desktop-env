@@ -32,16 +32,16 @@ class KeyboardController:
         if platform.system() == "Darwin":
             # Special key handling for Mac OS
             special_keys = {
-                58: pynput.keyboard.Key.alt,      # Option
-                55: pynput.keyboard.Key.cmd,      # Command
-                59: pynput.keyboard.Key.ctrl,     # Control
-                56: pynput.keyboard.Key.shift,    # Shift
-                36: pynput.keyboard.Key.enter,    # Return
-                49: pynput.keyboard.Key.space,    # Space
-                51: pynput.keyboard.Key.backspace,# Delete
+                58: pynput.keyboard.Key.alt,  # Option
+                55: pynput.keyboard.Key.cmd,  # Command
+                59: pynput.keyboard.Key.ctrl,  # Control
+                56: pynput.keyboard.Key.shift,  # Shift
+                36: pynput.keyboard.Key.enter,  # Return
+                49: pynput.keyboard.Key.space,  # Space
+                51: pynput.keyboard.Key.backspace,  # Delete
                 117: pynput.keyboard.Key.delete,  # Forward Delete
-                48: pynput.keyboard.Key.tab,      # Tab
-                53: pynput.keyboard.Key.esc,      # Escape
+                48: pynput.keyboard.Key.tab,  # Tab
+                53: pynput.keyboard.Key.esc,  # Escape
             }
             if key in special_keys:
                 self.controller.press(special_keys[key])
@@ -52,16 +52,16 @@ class KeyboardController:
     def release(self, key: int) -> None:
         if platform.system() == "Darwin":
             special_keys = {
-                58: pynput.keyboard.Key.alt,      # Option
-                55: pynput.keyboard.Key.cmd,      # Command
-                59: pynput.keyboard.Key.ctrl,     # Control
-                56: pynput.keyboard.Key.shift,    # Shift
-                36: pynput.keyboard.Key.enter,    # Return
-                49: pynput.keyboard.Key.space,    # Space
-                51: pynput.keyboard.Key.backspace,# Delete
+                58: pynput.keyboard.Key.alt,  # Option
+                55: pynput.keyboard.Key.cmd,  # Command
+                59: pynput.keyboard.Key.ctrl,  # Control
+                56: pynput.keyboard.Key.shift,  # Shift
+                36: pynput.keyboard.Key.enter,  # Return
+                49: pynput.keyboard.Key.space,  # Space
+                51: pynput.keyboard.Key.backspace,  # Delete
                 117: pynput.keyboard.Key.delete,  # Forward Delete
-                48: pynput.keyboard.Key.tab,      # Tab
-                53: pynput.keyboard.Key.esc,      # Escape
+                48: pynput.keyboard.Key.tab,  # Tab
+                53: pynput.keyboard.Key.esc,  # Escape
             }
             if key in special_keys:
                 self.controller.release(special_keys[key])

@@ -31,37 +31,32 @@ def construct_pipeline(
         output_format: The output format of the video. Either "raw" or "jpeg".
     """
     os_name = platform.system()
-    
+
     # Initialize base pipeline based on OS
     if os_name == "Windows":
         pipeline_parts = ["d3d11screencapturesrc show-cursor=TRUE"]
-        
+
         # Add window handle if window name is provided
         if window_name:
             window_info = get_window_by_title(window_name)
             pipeline_parts.append(f"window-handle={window_info.hWnd}")
-            
+
     elif os_name == "Darwin":
         # For macOS, use avfvideosrc with specific capture settings
         # Reference: gst-inspect-1.0 avfvideosrc shows available properties
-        pipeline_parts = [
-            "avfvideosrc",
-            "capture-screen=true",
-            "capture-screen-cursor=true",
-            "do-timestamp=true"
-        ]
-        
+        pipeline_parts = ["avfvideosrc", "capture-screen=true", "capture-screen-cursor=true", "do-timestamp=true"]
+
         # Add monitor selection if specified
         if monitor_idx is not None:
             pipeline_parts.append(f"device-index={monitor_idx}")
-            
+
         # Add specific format for macOS
         pipeline_parts.append("! video/x-raw,format=UYVY")
         pipeline_parts.append("! videoconvert n-threads=4")  # Use multiple threads for conversion
-            
+
     elif os_name == "Linux":
         pipeline_parts = ["ximagesrc"]
-        
+
     else:
         raise NotImplementedError(f"Unsupported platform: {os_name}")
 
@@ -78,10 +73,7 @@ def construct_pipeline(
 
     # Add common pipeline elements with OS-specific adjustments
     if os_name != "Darwin":  # macOS already has these settings
-        pipeline_parts.extend([
-            "do-timestamp=True",
-            "videorate drop-only=True"
-        ])
+        pipeline_parts.extend(["do-timestamp=True", "videorate drop-only=True"])
 
     # Add format settings
     if os_name == "Windows":
