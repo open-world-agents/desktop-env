@@ -1,6 +1,7 @@
 """
 This example demonstrates how to use the `Recorder` submodule to record the desktop screen.
 
+For more information, run `examples/recorder.py` with `--help` option.
 """
 
 import time
