@@ -15,7 +15,7 @@ In the realm of open-source agent research, three critical components are often 
 `desktop-env` is here to fill these gaps:
 
 - 🖥️ **Open-Source Environment**: Provides a rich, desktop-based environment identical to what humans use daily.
-- 📈 **Data Recorder**: Includes a built-in [screen-audio-timestamp recorder](#recorder) to capture and utilize real human desktop interactions.
+- 📈 **Data Recorder**: Includes a built-in [screen, audio, timestamp, keyboard/mouse recorder](#recorder) to capture and utilize real human desktop interactions.
 - 🤝 **Future Research Collaboration**: Plans are underway to foster open-source research in _a new repository_.
 
 **Any kind of open-source contributions are always welcome.**
@@ -47,7 +47,7 @@ Since `Recorder` utilize `desktop_env`, it is far more efficient than any other 
 
 - run just by typing `python3 examples/recorder.py FILE_LOCATION` and stop by `Ctrl+C`
 - almost 0% load in CPU/GPU. (Similar to commercial screen recording / broadcasting software, since it utilize Windows APIs (`DXGI/WGC`) and the powerful [GStreamer](https://gstreamer.freedesktop.org/) framework under the hood)
-- screen-audio-timestamp is recorded all in once in matroska(`.mkv`) container
+- screen, audio, timestamp, keyboard/mouse recorder is recorded all in once in matroska(`.mkv`) container
 
 For more detail, run `python3 examples/recorder.py --help`!
 

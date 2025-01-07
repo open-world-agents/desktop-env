@@ -7,8 +7,10 @@ For more information, run `examples/recorder.py` with `--help` option.
 import time
 from typing import Optional
 
+import orjson
 import typer
 from loguru import logger
+from pydantic import BaseModel
 from tqdm import tqdm
 from typing_extensions import Annotated
 
@@ -20,6 +22,33 @@ logger.remove()
 logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
 
 logger.enable("desktop_env")  # it's optional to enable the logger; just for debugging
+
+
+class BagEvent(BaseModel):
+    timestamp_ns: int
+    event_src: str
+    event_data: bytes
+
+
+def write_event_into_jsonl(event, source=None):
+    # you can find where the event is coming from. e.g. where the calling this function
+    # frame = inspect.currentframe().f_back
+
+    with open("event.jsonl", "ab") as f:
+        if isinstance(event, BaseModel):
+            event_data = event.model_dump_json().encode("utf-8")
+        else:
+            event_data = orjson.dumps(event)
+        bag_event = BagEvent(timestamp_ns=time.time_ns(), event_src=source, event_data=event_data)
+        f.write(bag_event.model_dump_json().encode("utf-8") + b"\n")
+
+
+def window_publisher_callback(event):
+    write_event_into_jsonl(event, source="window_publisher")
+
+
+def control_publisher_callback(event):
+    write_event_into_jsonl(event, source="control_publisher")
 
 
 def main(
@@ -46,7 +75,18 @@ def main(
                     window_name=window_name,
                     monitor_idx=monitor_idx,
                 ),
-            }
+            },
+            {
+                "module": "desktop_env.window_publisher.WindowPublisher",
+                "args": {"callback": window_publisher_callback},
+            },
+            {
+                "module": "desktop_env.control_publisher.ControlPublisher",
+                "args": {
+                    "keyboard_callback": control_publisher_callback,
+                    "mouse_callback": control_publisher_callback,
+                },
+            },
         ]
     )
     desktop = Desktop.from_args(args)
