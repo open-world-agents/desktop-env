@@ -46,7 +46,7 @@ In the realm of open-source agent research, three critical components are often 
 Since `Recorder` utilize `desktop_env`, it is far more efficient than any other existing python-based screen recorders.
 
 - run just by typing `python3 examples/recorder.py FILE_LOCATION` and stop by `Ctrl+C`
-- almost 0% load in CPU/GPU. (Similar to commercial screen recording / broadcasting software, since it utilize [GStreamer](https://gstreamer.freedesktop.org/) under the hood)
+- almost 0% load in CPU/GPU. (Similar to commercial screen recording / broadcasting software, since it utilize Windows APIs (`DXGI/WGC`) and the powerful [GStreamer](https://gstreamer.freedesktop.org/) framework under the hood)
 - screen-audio-timestamp is recorded all in once in matroska(`.mkv`) container
 
 For more detail, run `python3 examples/recorder.py --help`!
