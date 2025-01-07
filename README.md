@@ -47,7 +47,7 @@ Since `Recorder` utilize `desktop_env`, it is far more efficient than any other 
 
 - run just by typing `python3 examples/recorder.py FILE_LOCATION` and stop by `Ctrl+C`
 - almost 0% load in CPU/GPU. (Similar to commercial screen recording / broadcasting software, since it utilize Windows APIs (`DXGI/WGC`) and the powerful [GStreamer](https://gstreamer.freedesktop.org/) framework under the hood)
-- screen, audio, timestamp, keyboard/mouse recorder is recorded all in once in matroska(`.mkv`) container
+- screen, audio, timestamp is recorded all in once in matroska(`.mkv`) container, timestamp is recorded as video subtitle. keyboard, mouse, window data is recorded all in once in `event.jsonl` file.
 
 For more detail, run `python3 examples/recorder.py --help`!
 
