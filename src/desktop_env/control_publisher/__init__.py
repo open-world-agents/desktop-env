@@ -10,6 +10,8 @@ from .callback_factory import KeyboardListenerFactory, MouseListenerFactory
 
 
 class ControlPublisher(AbstractThread):
+    args_cls = ControlPublishArgs
+
     def __init__(self, keyboard_callback: Callable, mouse_callback: Callable):
         self.keyboard_callback = keyboard_callback
         self.mouse_callback = mouse_callback

@@ -1,16 +1,20 @@
 import threading
 
+from .args import BaseArgs
+
 
 class AbstractThread:
     """Abstract class for creating threads.
     Thread's lifecycle: start -> stop -> join -> close
     """
 
+    args_cls = BaseArgs
+
     def __init__(self):
         super().__init__()
 
     @classmethod
-    def from_args(cls, args):
+    def from_args(cls, args: BaseArgs):
         raise NotImplementedError
 
     def start(self):

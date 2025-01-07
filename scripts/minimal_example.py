@@ -33,16 +33,24 @@ def on_event(event):
 
 if __name__ == "__main__":
     args = DesktopArgs(
-        windows_capture_args={
-            "on_frame_arrived": on_frame_arrived,
-            "pipeline_description": construct_pipeline(
-                window_name=None,  # you may substring of the window name
-                monitor_idx=None,  # you may specify the monitor index
-                framerate="60/1",
-            ),
-        },
-        window_publisher_args={"callback": on_event},
-        control_publisher_args={"keyboard_callback": on_event, "mouse_callback": on_event},
+        submodules=[
+            {
+                "module": "desktop_env.windows_capture.WindowsCapture",
+                "args": {
+                    "on_frame_arrived": on_frame_arrived,
+                    "pipeline_description": construct_pipeline(
+                        window_name=None,  # you may specify a substring of the window name
+                        monitor_idx=None,  # you may specify the monitor index
+                        framerate="60/1",
+                    ),
+                },
+            },
+            {"module": "desktop_env.window_publisher.WindowPublisher", "args": {"callback": on_event}},
+            {
+                "module": "desktop_env.control_publisher.ControlPublisher",
+                "args": {"keyboard_callback": on_event, "mouse_callback": on_event},
+            },
+        ]
     )
     desktop = Desktop.from_args(args)
 

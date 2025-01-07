@@ -20,6 +20,8 @@ Gst.init(None)
 
 
 class WindowsCapture(AbstractThread):
+    args_cls = WindowsCaptureArgs
+
     def __init__(
         self,
         on_frame_arrived: Callable[[FrameStamped], None],

@@ -1,10 +1,6 @@
-import functools
-import inspect
 import time
 
-import cv2
 import orjson
-import yaml
 from loguru import logger
 from pydantic import BaseModel
 from tqdm import tqdm
@@ -65,34 +61,46 @@ def control_publisher_callback(event):
 
 if __name__ == "__main__":
     # Example 1. Capture the entire screen and discard all other events
-    # args = DesktopArgs(
-    #     windows_capture_args={
-    #         "on_frame_arrived": on_frame_arrived,
-    #         "pipeline_description": construct_pipeline(monitor_idx=1),
-    #     },
-    #     window_publisher_args={"callback": "desktop_env.args.callback_sink"},
-    #     control_publisher_args={
-    #         "keyboard_callback": "desktop_env.args.callback_sink",
-    #         "mouse_callback": "desktop_env.args.callback_sink",
-    #     },
-    # )
+    args = DesktopArgs(
+        submodules=[
+            {
+                "module": "desktop_env.windows_capture.WindowsCapture",
+                "args": {
+                    "on_frame_arrived": on_frame_arrived,
+                    "pipeline_description": construct_pipeline(monitor_idx=0),
+                },
+            }
+        ]
+    )
     # Example 2. Capture a specific window and save all events into a JSONL file
     args = DesktopArgs(
-        windows_capture_args={
-            "on_frame_arrived": on_frame_arrived,
-            "pipeline_description": construct_pipeline(
-                window_name=None,  # you may specify the substring of the window name
-                monitor_idx=None,  # you may specify the monitor index
-                framerate="60/1",
-            ),
-        },
-        window_publisher_args={"callback": window_publisher_callback},
-        control_publisher_args={
-            "keyboard_callback": control_publisher_callback,
-            "mouse_callback": control_publisher_callback,
-        },
+        submodules=[
+            {
+                "module": "desktop_env.window_publisher.WindowPublisher",
+                "args": {"callback": window_publisher_callback},
+            },
+            {
+                "module": "desktop_env.windows_capture.WindowsCapture",
+                "args": {
+                    "on_frame_arrived": on_frame_arrived,
+                    "pipeline_description": construct_pipeline(
+                        window_name=None,  # you may specify the substring of the window name
+                        monitor_idx=None,  # you may specify the monitor index
+                        framerate="60/1",
+                    ),
+                },
+            },
+            {
+                "module": "desktop_env.control_publisher.ControlPublisher",
+                "args": {
+                    "keyboard_callback": control_publisher_callback,
+                    "mouse_callback": control_publisher_callback,
+                },
+            },
+        ]
     )
     args.to_yaml("desktop_args.yaml")
+
     desktop = Desktop.from_args(args)
 
     try:

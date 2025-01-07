@@ -1,12 +1,22 @@
-from typing import Optional
+from typing import Any
+
+from pydantic import AfterValidator, BaseModel, Field, ImportString, ValidationError, model_validator
+from typing_extensions import Annotated, Self
 
 from .args import BaseArgs
-from .control_publisher.args import ControlPublishArgs
-from .window_publisher.args import WindowPublishArgs
-from .windows_capture.args import WindowsCaptureArgs
+from .threading import AbstractThread
+
+
+class SubmoduleArgs(BaseArgs):
+    module: ImportString
+    args: Any
+
+    @model_validator(mode="after")
+    def instantiate_args(self) -> Self:
+        args_cls = self.module.args_cls
+        self.args = args_cls(**self.args)
+        return self
 
 
 class DesktopArgs(BaseArgs):
-    windows_capture_args: Optional[WindowsCaptureArgs] = None
-    window_publisher_args: Optional[WindowPublishArgs] = None
-    control_publisher_args: Optional[ControlPublishArgs] = None
+    submodules: list[SubmoduleArgs] = Field(default_factory=list)

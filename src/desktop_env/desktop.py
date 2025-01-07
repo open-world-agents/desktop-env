@@ -2,11 +2,8 @@ import importlib
 import time
 
 from .actor import ActorMixin
-from .control_publisher import ControlPublisher
 from .desktop_args import DesktopArgs
 from .threading import AbstractThread
-from .window_publisher import WindowPublisher
-from .windows_capture import WindowsCapture as ScreenCapture  # TODO: Rename module to screen_capture
 
 
 class Desktop(AbstractThread, ActorMixin):
@@ -16,14 +13,13 @@ class Desktop(AbstractThread, ActorMixin):
         # Create threads
         self.threads = []
 
-        screen_capture = ScreenCapture.from_args(args.windows_capture_args)
-        self.threads.append(screen_capture)
-
-        window_publisher = WindowPublisher.from_args(args.window_publisher_args)
-        self.threads.append(window_publisher)
-
-        control_publisher = ControlPublisher.from_args(args.control_publisher_args)
-        self.threads.append(control_publisher)
+        for submodule in args.submodules:
+            if isinstance(submodule, str):
+                module: AbstractThread = importlib.import_module(submodule.module)
+            else:
+                module: AbstractThread = submodule.module
+            thread = module.from_args(submodule.args)
+            self.threads.append(thread)
 
     @classmethod
     def from_args(cls, args: DesktopArgs):
