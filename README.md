@@ -15,7 +15,7 @@ In the realm of open-source agent research, three critical components are often 
 `desktop-env` is here to fill these gaps:
 
 - 🖥️ **Open-Source Environment**: Provides a rich, desktop-based environment identical to what humans use daily.
-- 📈 **Data Recorder**: Includes a built-in [recorder](examples/recorder/) to capture and utilize real human desktop interactions.
+- 📈 **Data Recorder**: Includes a built-in [screen-audio-timestamp recorder](#recorder) to capture and utilize real human desktop interactions.
 - 🤝 **Future Research Collaboration**: Plans are underway to foster open-source research in _a new repository_.
 
 **Any kind of open-source contributions are always welcome.**
@@ -41,6 +41,34 @@ In the realm of open-source agent research, three critical components are often 
 - **macOS**: Full support using AVFoundation for screen capture
 - **Linux**: Basic support (work in progress)
 
+### Recorder
+
+Since `Recorder` utilize `desktop_env`, it is far more efficient than any other existing python-based screen recorders.
+
+- run just by typing `python3 examples/recorder.py FILE_LOCATION` and stop by `Ctrl+C`
+- almost 0% load in CPU/GPU. (Similar to commercial screen recording / broadcasting software, since it utilize [GStreamer](https://gstreamer.freedesktop.org/) under the hood)
+- screen-audio-timestamp is recorded all in once in matroska(`.mkv`) container
+
+For more detail, run `python3 examples/recorder.py --help`!
+
+```
+                                                                                                                                                                                                                                              
+ Usage: recorder.py [OPTIONS] FILE_LOCATION                                                                                                                                                                                                   
+                                                                                                                                                                                                                                              
+╭─ Arguments ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *    file_location      TEXT  The location of the output file, use `.mkv` extension. [default: None] [required]                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --record-audio        --no-record-audio                 Whether to record audio [default: record-audio]                                                                                                                                    │
+│ --record-video        --no-record-video                 Whether to record video [default: record-video]                                                                                                                                    │
+│ --record-timestamp    --no-record-timestamp             Whether to record timestamp [default: record-timestamp]                                                                                                                            │
+│ --window-name                                  TEXT     The name of the window to capture, substring of window name is supported [default: None]                                                                                           │
+│ --monitor-idx                                  INTEGER  The index of the monitor to capture [default: None]                                                                                                                                │
+│ --help                                                  Show this message and exit.                                                                                                                                                        │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+```
+
 ---
 
 ## 🚀 Blazing Performance
@@ -61,7 +89,7 @@ _Measured on i5-11400, GTX 1650._ Not only is FPS measured, but CPU/GPU resource
 
 ## 💡 Examples
 
-### 🎮 Working Demo
+### 🎮 Working Demo. real-time, local-model ZType game agent
 
 https://github.com/user-attachments/assets/4aee4580-179d-4e57-b876-0dd5256bb9c5
 

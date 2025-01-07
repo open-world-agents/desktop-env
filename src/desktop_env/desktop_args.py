@@ -14,7 +14,8 @@ class SubmoduleArgs(BaseArgs):
     @model_validator(mode="after")
     def instantiate_args(self) -> Self:
         args_cls = self.module.args_cls
-        self.args = args_cls(**self.args)
+        if not isinstance(self.args, args_cls):
+            self.args = args_cls(**self.args)
         return self
 
 
