@@ -1,11 +1,17 @@
-control_publisher_args:
-  keyboard_callback: __main__.control_publisher_callback
-  mouse_callback: __main__.control_publisher_callback
-window_publisher_args:
-  callback: __main__.window_publisher_callback
-windows_capture_args:
-  on_frame_arrived: __main__.on_frame_arrived
-  pipeline_description: d3d11screencapturesrc show-cursor=TRUE  window-handle=1574624
-    monitor-index=0  do-timestamp=True ! videorate drop-only=True ! video/x-raw,framerate=0/1,max-framerate=60/1
-    ! videoconvert ! video/x-raw,format=BGRA ! appsink name=appsink max-buffers=1
-    drop=true
+submodules:
+- args:
+    callback: __main__.window_publisher_callback
+    fps: 4.0
+    verbose: false
+  module: desktop_env.window_publisher.WindowPublisher
+- args:
+    on_frame_arrived: __main__.on_frame_arrived
+    pipeline_description: 'd3d11screencapturesrc show-cursor=TRUE   do-timestamp=True
+      ! videorate drop-only=True ! video/x-raw(memory:D3D11Memory),framerate=0/1,max-framerate=60/1
+      ! tee name=tt. ! queue leaky=downstream ! d3d11download ! video/x-raw,format=BGRA
+      ! appsink name=appsink max-buffers=1 drop=true '
+  module: desktop_env.windows_capture.windows_capture.WindowsCapture
+- args:
+    keyboard_callback: __main__.control_publisher_callback
+    mouse_callback: __main__.control_publisher_callback
+  module: desktop_env.control_publisher.ControlPublisher

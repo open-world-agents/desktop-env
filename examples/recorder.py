@@ -1,35 +1,27 @@
+"""
+This example demonstrates how to use the `Recorder` submodule to record the desktop screen.
+
+For more information, run `examples/recorder.py` with `--help` option.
+"""
+
 import time
+from typing import Optional
 
 import orjson
+import typer
 from loguru import logger
 from pydantic import BaseModel
 from tqdm import tqdm
+from typing_extensions import Annotated
 
 from desktop_env import Desktop, DesktopArgs
-from desktop_env.msg import FrameStamped
-from desktop_env.windows_capture import construct_pipeline
+from desktop_env.recorder import RecorderArgs
 
 # how to use loguru with tqdm: https://github.com/Delgan/loguru/issues/135
 logger.remove()
 logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
 
 logger.enable("desktop_env")  # it's optional to enable the logger; just for debugging
-
-
-def on_frame_arrived(frame: FrameStamped):
-    # Every 2 seconds, print the timestamp and latency of the frame
-    now = time.time_ns()
-    on_frame_arrived.last_printed = getattr(on_frame_arrived, "last_printed", 0)
-    on_frame_arrived.count = getattr(on_frame_arrived, "count", 0) + 1
-    if now - on_frame_arrived.last_printed >= 2e9:
-        latency = (now - frame.timestamp_ns) / 1e6
-        logger.info(f"Frame arrived at {frame.timestamp_ns}, latency: {latency:.2f} ms")
-
-        frame_arr = frame.frame_arr
-
-        # save into file
-        # cv2.imwrite(f"frame_{on_frame_arrived.count:02d}.jpg", frame_arr)
-        on_frame_arrived.last_printed = now
 
 
 class BagEvent(BaseModel):
@@ -59,36 +51,34 @@ def control_publisher_callback(event):
     write_event_into_jsonl(event, source="control_publisher")
 
 
-if __name__ == "__main__":
-    # Example 1. Capture the entire screen and discard all other events
+def main(
+    file_location: Annotated[str, typer.Argument(help="The location of the output file, use `.mkv` extension.")],
+    *,
+    record_audio: Annotated[bool, typer.Option(help="Whether to record audio")] = True,
+    record_video: Annotated[bool, typer.Option(help="Whether to record video")] = True,
+    record_timestamp: Annotated[bool, typer.Option(help="Whether to record timestamp")] = True,
+    window_name: Annotated[
+        Optional[str], typer.Option(help="The name of the window to capture, substring of window name is supported")
+    ] = None,
+    monitor_idx: Annotated[Optional[int], typer.Option(help="The index of the monitor to capture")] = None,
+):
+    assert file_location.endswith(".mkv"), "The output file must have `.mkv` extension."
     args = DesktopArgs(
         submodules=[
             {
-                "module": "desktop_env.windows_capture.WindowsCapture",
-                "args": {
-                    "on_frame_arrived": on_frame_arrived,
-                    "pipeline_description": construct_pipeline(monitor_idx=0),
-                },
-            }
-        ]
-    )
-    # Example 2. Capture a specific window and save all events into a JSONL file
-    args = DesktopArgs(
-        submodules=[
+                "module": "desktop_env.recorder.Recorder",
+                "args": RecorderArgs(
+                    filesink_location=file_location,
+                    record_audio=record_audio,
+                    record_video=record_video,
+                    record_timestamp=record_timestamp,
+                    window_name=window_name,
+                    monitor_idx=monitor_idx,
+                ),
+            },
             {
                 "module": "desktop_env.window_publisher.WindowPublisher",
                 "args": {"callback": window_publisher_callback},
-            },
-            {
-                "module": "desktop_env.windows_capture.WindowsCapture",
-                "args": {
-                    "on_frame_arrived": on_frame_arrived,
-                    "pipeline_description": construct_pipeline(
-                        window_name=None,  # you may specify the substring of the window name
-                        monitor_idx=None,  # you may specify the monitor index
-                        framerate="60/1",
-                    ),
-                },
             },
             {
                 "module": "desktop_env.control_publisher.ControlPublisher",
@@ -99,8 +89,6 @@ if __name__ == "__main__":
             },
         ]
     )
-    args.to_yaml("desktop_args.yaml")
-
     desktop = Desktop.from_args(args)
 
     try:
@@ -119,3 +107,7 @@ if __name__ == "__main__":
         desktop.close()
 
         # or you may use desktop.stop_join_close()
+
+
+if __name__ == "__main__":
+    typer.run(main)

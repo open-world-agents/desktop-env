@@ -15,7 +15,7 @@ In the realm of open-source agent research, three critical components are often 
 `desktop-env` is here to fill these gaps:
 
 - 🖥️ **Open-Source Environment**: Provides a rich, desktop-based environment identical to what humans use daily.
-- 📈 **Data Recorder**: Includes a built-in [recorder](examples/recorder/) to capture and utilize real human desktop interactions.
+- 📈 **Data Recorder**: Includes a built-in [screen, audio, timestamp, keyboard/mouse recorder](#recorder) to capture and utilize real human desktop interactions.
 - 🤝 **Future Research Collaboration**: Plans are underway to foster open-source research in _a new repository_.
 
 **Any kind of open-source contributions are always welcome.**
@@ -41,6 +41,34 @@ In the realm of open-source agent research, three critical components are often 
 - **macOS**: Full support using AVFoundation for screen capture
 - **Linux**: Basic support (work in progress)
 
+### Recorder
+
+Since `Recorder` utilize `desktop_env`, it is far more efficient than any other existing python-based screen recorders.
+
+- run just by typing `python3 examples/recorder.py FILE_LOCATION` and stop by `Ctrl+C`
+- almost 0% load in CPU/GPU. (Similar to commercial screen recording / broadcasting software, since it utilize Windows APIs (`DXGI/WGC`) and the powerful [GStreamer](https://gstreamer.freedesktop.org/) framework under the hood)
+- screen, audio, timestamp is recorded all in once in matroska(`.mkv`) container, timestamp is recorded as video subtitle. keyboard, mouse, window data is recorded all in once in `event.jsonl` file.
+
+For more detail, run `python3 examples/recorder.py --help`!
+
+```
+                                                                                                                                                                                                                                              
+ Usage: recorder.py [OPTIONS] FILE_LOCATION                                                                                                                                                                                                   
+                                                                                                                                                                                                                                              
+╭─ Arguments ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *    file_location      TEXT  The location of the output file, use `.mkv` extension. [default: None] [required]                                                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --record-audio        --no-record-audio                 Whether to record audio [default: record-audio]                                                                                                                                    │
+│ --record-video        --no-record-video                 Whether to record video [default: record-video]                                                                                                                                    │
+│ --record-timestamp    --no-record-timestamp             Whether to record timestamp [default: record-timestamp]                                                                                                                            │
+│ --window-name                                  TEXT     The name of the window to capture, substring of window name is supported [default: None]                                                                                           │
+│ --monitor-idx                                  INTEGER  The index of the monitor to capture [default: None]                                                                                                                                │
+│ --help                                                  Show this message and exit.                                                                                                                                                        │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+```
+
 ---
 
 ## 🚀 Blazing Performance
@@ -61,7 +89,7 @@ _Measured on i5-11400, GTX 1650._ Not only is FPS measured, but CPU/GPU resource
 
 ## 💡 Examples
 
-### 🎮 Working Demo
+### 🎮 Working Demo. real-time, local-model ZType game agent
 
 https://github.com/user-attachments/assets/4aee4580-179d-4e57-b876-0dd5256bb9c5
 
@@ -87,16 +115,24 @@ def on_event(event):
 
 if __name__ == "__main__":
     args = DesktopArgs(
-        windows_capture_args={
-            "on_frame_arrived": on_frame_arrived,
-            "pipeline_description": construct_pipeline(
-                window_name=None,  # you may specify a substring of the window name
-                monitor_idx=None,  # you may specify the monitor index
-                framerate="60/1",
-            ),
-        },
-        window_publisher_args={"callback": on_event},
-        control_publisher_args={"keyboard_callback": on_event, "mouse_callback": on_event},
+        submodules=[
+            {
+                "module": "desktop_env.windows_capture.WindowsCapture",
+                "args": {
+                    "on_frame_arrived": on_frame_arrived,
+                    "pipeline_description": construct_pipeline(
+                        window_name=None,  # you may specify a substring of the window name
+                        monitor_idx=None,  # you may specify the monitor index
+                        framerate="60/1",
+                    ),
+                },
+            },
+            {"module": "desktop_env.window_publisher.WindowPublisher", "args": {"callback": on_event}},
+            {
+                "module": "desktop_env.control_publisher.ControlPublisher",
+                "args": {"keyboard_callback": on_event, "mouse_callback": on_event},
+            },
+        ]
     )
     desktop = Desktop.from_args(args)
 
@@ -126,11 +162,19 @@ if __name__ == "__main__":
 
 ```bash
 # 1. Install GStreamer and dependencies via conda
-conda install -c conda-forge pygobject -y
+conda install -c conda-forge pygobject gst-python -y
+# pygobject: PyGObject is a Python package which provides bindings for GObject based libraries such as GTK+, GStreamer, WebKitGTK+, GLib, GIO and many more.
+# gst-python: `python` plugin, loader for plugins written in python
 conda install -c conda-forge gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly -y
 
 # 2. Install desktop-env
 poetry install --with windows
+```
+
+Install custom plugin, by configuring environment variable.
+```
+$env:GST_PLUGIN_PATH = (Join-Path -Path $pwd -ChildPath "custom_plugin")
+echo $env:GST_PLUGIN_PATH
 ```
 
 ### macOS Installation
@@ -142,6 +186,8 @@ brew install gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plu
 # 2. Install desktop-env with macOS dependencies
 poetry install --with macos
 ```
+
+Install custom plugin, by configuring environment variable as Windows guide.
 
 🚨 **Notes**:
 

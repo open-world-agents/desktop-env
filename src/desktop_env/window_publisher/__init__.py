@@ -14,12 +14,13 @@ from .msg import WindowInfo
 class WindowPublisher(AbstractThread):
     """Publishes the active window information to the callback function every 1/FPS seconds"""
 
-    FPS = 4
+    args_cls = WindowPublishArgs
 
-    def __init__(self, callback: Callable, verbose: bool):
+    def __init__(self, callback: Callable, verbose: bool, fps: int):
         self.pbar = tqdm(total=None, desc="Publishing windows info", dynamic_ncols=True, disable=not verbose)
         self.stop_event = threading.Event()
         self.callback = callback
+        self.fps = fps
 
         if platform.system() == "Darwin":
             from Quartz import CGWindowListCopyWindowInfo, kCGNullWindowID, kCGWindowListOptionOnScreenOnly
@@ -66,7 +67,7 @@ class WindowPublisher(AbstractThread):
 
     @classmethod
     def from_args(cls, args: WindowPublishArgs):
-        return cls(args.callback, args.verbose)
+        return cls(args.callback, args.verbose, args.fps)
 
     def start(self):
         while not self.stop_event.is_set():
@@ -75,7 +76,7 @@ class WindowPublisher(AbstractThread):
                 self.pbar.update(1)
                 self.pbar.set_postfix(title=window_info.title)
                 self.callback(window_info)
-            time.sleep(1 / self.FPS)
+            time.sleep(1 / self.fps)
 
     def start_free_threaded(self):
         self._loop_thread = threading.Thread(target=self.start)

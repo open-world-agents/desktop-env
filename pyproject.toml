@@ -22,6 +22,7 @@ pygetwindow = {version = "^0.0.9", platform = "win32"}
 # macOS-specific dependencies
 pyobjc-framework-Quartz = {version = "^10.1", platform = "darwin"}  # For window management on macOS
 pyobjc-framework-ApplicationServices = {version = "^10.1", platform = "darwin"}  # For UI automation on macOS
+typer = "^0.15.1"
 
 [tool.poetry.group.windows]
 optional = true

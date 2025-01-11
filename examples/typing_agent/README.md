@@ -46,13 +46,18 @@ The sequence diagram above illustrates the interaction between different compone
 
 ```python
 args = DesktopArgs(
-    windows_capture_args={
-        "on_frame_arrived": on_frame_arrived,
-        "pipeline_description": construct_pipeline(
-            window_name=ZTYPE_WINDOW_NAME,
-            framerate="4/1",  # Reduced framerate because VLM does not require high-frequency input, but you may specify 60+ fps
-        ),
-    },
+    submodules=[
+        {
+            "module": "desktop_env.windows_capture.WindowsCapture",
+            "args": {
+                "on_frame_arrived": on_frame_arrived,
+                "pipeline_description": construct_pipeline(
+                    window_name=ZTYPE_WINDOW_NAME,
+                    framerate="4/1",  # Reduced framerate because VLM does not require high-frequency input, but you may specify 60+ fps
+                ),
+            },
+        }
+    ]
 )
 ```
 - Captures game window frames
