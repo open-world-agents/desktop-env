@@ -25,12 +25,12 @@ utctimestampsrc interval=1 ! subparse ! mux.
 gst-launch-1.0 -e -v `
 matroskamux name=mux ! filesink location=output.mkv `
 wasapi2src do-timestamp=true loopback=true low-latency=true ! audioconvert ! mfaacenc ! queue ! mux. `
-d3d11screencapturesrc show-cursor=true do-timestamp=true ! `
-videorate drop-only=true ! "video/x-raw(memory:D3D11Memory),framerate=0/1,max-framerate=60/1" ! `
+d3d11screencapturesrc show-cursor=true do-timestamp=true ! videorate drop-only=true ! "video/x-raw(memory:D3D11Memory),framerate=0/1,max-framerate=60/1" ! `
 tee name=t `
-t. ! queue leaky=downstream ! `
-d3d11download ! videoconvert ! "video/x-raw,format=BGRA" ! `
+t. ! queue leaky=downstream ! d3d11download ! videoconvert ! "video/x-raw,format=BGRA" ! `
 appsink name=appsink sync=true max-buffers=1 drop=true emit-signals=true `
+t. ! queue leaky=downstream ! d3d11download ! videoconvert ! "video/x-raw,format=BGRA" ! `
+fpsdisplaysink video-sink=fakesink `
 t. ! queue ! d3d11convert ! mfh264enc ! h264parse ! queue ! mux. `
 utctimestampsrc interval=1 do-timestamp=true ! subparse ! queue ! mux. 
 """
